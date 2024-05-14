@@ -1,12 +1,11 @@
-import { ref, computed } from 'vue'
-import { defineStore } from 'pinia'
+import { ref, computed } from "vue";
+import { defineStore } from "pinia";
+import axios from "axios";
+import { useRouter } from "vue-router";
 
-export const useCounterStore = defineStore('counter', () => {
-  const count = ref(0)
-  const doubleCount = computed(() => count.value * 2)
-  function increment() {
-    count.value++
-  }
-
-  return { count, doubleCount, increment }
-})
+export const useCounterStore = defineStore("counter", () => {
+    const articles = ref([]);
+    // const API_URL = "http://127.0.0.1:8000.";
+    // 꼭 활성화 하기
+    return { articles, API_URL }, { persist: true };
+});

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Created by https://www.toptal.com/developers/gitignore/api/macos,windows,visualstudiocode,python,django,venv,vue,vuejs,node,database
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,windows,visualstudiocode,python,django,venv,vue,vuejs,node,database
 
@@ -10,6 +11,10 @@
 *.sqlite3
 *.db-shm
 *.db-wal
+=======
+# Created by https://www.toptal.com/developers/gitignore/api/django,vuejs
+# Edit at https://www.toptal.com/developers/gitignore?templates=django,vuejs
+>>>>>>> 0d78a38dac2321db5e767c30707997d17f93473e
 
 ### Django ###
 *.log
@@ -181,6 +186,7 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+<<<<<<< HEAD
 ### macOS ###
 # General
 .DS_Store
@@ -518,3 +524,13 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,visualstudiocode,python,django,venv,vue,vuejs,node,database
+=======
+### Vuejs ###
+# Recommended template: Node.gitignore
+
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# End of https://www.toptal.com/developers/gitignore/api/django,vuejs
+>>>>>>> 0d78a38dac2321db5e767c30707997d17f93473e

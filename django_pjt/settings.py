@@ -25,12 +25,26 @@ SECRET_KEY = 'django-insecure-eqb3uxx-gpy+prw#h36g)6f!)ia-*--6ym#*+*rnfdakov!t0y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    
+]
 
 
 # Application definition
+AUTH_USER_MODEL = 'accounts.User'
 
 INSTALLED_APPS = [
+    'allauth.socialaccount',
+    'allauth.account',
+    'allauth',
+    'django.contrib.sites',
+    'dj_rest_auth.registration',
+    'corsheaders',
+    'dj_rest_auth',
+    'CRUD',
+    'accounts',
+    'rest_framework.authtoken',
+    'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,8 +52,31 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+SITE_ID = 1
 
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+REST_FRAMEWORK = {
+    # 전역 설정
+    # Authentication
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        # 기본 인증방식을 토큰으로 하겠다.
+    ],
+    # permission
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+        # view 함수들의 기본 권한을 전부 인증 안 해도 되게 하겠다(AllowAny)-> 기본 인증을 다 풀어주고, 우리가 설정하는 것만 토큰 인증으로
+    ],
+}
+CORS_ALLOWED_ORIGINS=[
+    'http://127.0.0.1:8000',
+    'http://localhost:5173',
+]
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 MIDDLEWARE = [
+    'allauth.account.middleware.AccountMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

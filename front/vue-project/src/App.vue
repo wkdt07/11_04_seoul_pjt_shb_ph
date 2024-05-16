@@ -1,17 +1,32 @@
 <template>
   <header>
     <nav>
-      <RouterLink :to="{ name: 'ArticlesView' }">Articles</RouterLink>
-      <RouterLink :to="{ name: 'SignUpView' }">Sign Up Page</RouterLink>
-      <RouterLink :to="{ name: 'LoginView' }">Login Page</RouterLink>
+      <RouterLink :to="{ name: 'ArticleView'}">Articles</RouterLink><hr>
+      <RouterLink :to="{ name: 'SignUpView'}">SignUpPage</RouterLink><hr>
+      <RouterLink :to="{ name: 'LogInView'}">LogInPage</RouterLink><hr>
+      <RouterLink :to="{name:'MapView'}">Map</RouterLink><hr>
+      <button v-if="store.isLogin" @click.prevent="logOut">로그아웃</button>
+      
     </nav>
   </header>
   <RouterView />
+  
+
 </template>
 
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterView, RouterLink } from 'vue-router'
+import { useCounterStore } from './stores/counter';
+import { useRouter } from 'vue-router';
+// import Map from './components/Map.vue';
 
+const store = useCounterStore()
+const router = useRouter()
+const logOut=function(){
+  store.logOut()
+  router.push({name:'LogInView'})
+}
 </script>
 
-<style scoped></style>
+<style scoped>
+</style>

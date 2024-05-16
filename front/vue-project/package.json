@@ -12,7 +12,9 @@
     "axios": "^1.6.8",
     "pinia": "^2.1.7",
     "vue": "^3.4.21",
-    "vue-router": "^4.3.0"
+    "vue-kakao-maps": "^0.2.11",
+    "vue-router": "^4.3.0",
+    "vue3-kakao-maps": "^2.3.6"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",

@@ -1,25 +1,70 @@
-import { createRouter, createWebHistory } from "vue-router";
-import ArticleView from "@/views/ArticleView.vue";
+import { createRouter, createWebHistory } from 'vue-router'
+import ArticleView from '@/views/ArticleView.vue'
+import DetailView from '@/views/DetailView.vue'
+import CreateView from '@/views/CreateView.vue'
+import SignUpView from '@/views/SignUpView.vue'
+import LogInView from '@/views/LogInView.vue'
+import CreateCommentView from '@/views/CreateCommentView.vue'
+import MapView from '@/views/MapView.vue'
+import { useCounterStore } from '@/stores/counter'
 
-import { useCounterStore } from "@/stores/counter";
 const router = createRouter({
-    routes: [
-        {
-            path: "/",
-            name: "ArticlesView",
-            component: ArticleView,
-        },
-        {
-            path: "/login",
-            name: "LoginView",
-            component: LoginView,
-        },
-        {
-            path: "/signup",
-            name: "signUpView",
-            component: SignUpView,
-        },
-    ],
-});
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [
+    {
+      path: '/',
+      name: 'ArticleView',
+      component: ArticleView
+    },
+    {
+      path: '/articles/:id',
+      name: 'DetailView',
+      component: DetailView
+    },
+    {
+      path: '/create',
+      name: 'CreateView',
+      component: CreateView
+    },
+    {
+      path: '/signup',
+      name: 'SignUpView',
+      component: SignUpView
+    },
+    {
+      path: '/login',
+      name: 'LogInView',
+      component: LogInView
+    },
+    {
+        path:'/articles/:article_pk/createComment',
+        name:'createComment',
+        component:CreateCommentView
+    },
+    {
+      path:'/map',
+      name:'MapView',
+      component:MapView
+    }
 
-export default router;
+]
+})
+
+router.beforeEach((to,from)=>{
+  const store=useCounterStore()
+  if(to.name==='ArticleView'&& !store.isLogin){
+    window.alert('로그인이 필요합니다.')
+    console.log(store.isLogin)
+    console.log(store.token)
+    return {name:'LogInView'}
+  }
+  if ((to.name === 'SignUpView'||to.name==='LogInView') && (store.isLogin)){
+    window.alert('이미 로그인이 되어있습니다')
+    return {name:'ArticleView'}
+  }
+  if ((to.name ==='LogOutView')&& !store.isLogin){
+    window.alert('아직 로그인하지 않았습니다.')
+    return {name:'LogInView'}
+  }
+})
+export default router

@@ -1,33 +1,34 @@
 <template>
     <div>
-        <h1>Login Page</h1>
-        <form @submit="logIn">
-            <label for="id">id: </label>
-            <input type="text" id="id" v-model.trim="id">
-            <label for="password">pw: </label>
-            <input type="password" id="password" v-model.trim="password">
-
-
-            <input type="submit" value="로그인">
-        </form>
+      <form @submit.prevent="logIn">
+        <label for="username">username : </label>
+        <input type="text" id="username" v-model.trim="username"><br>
+        <label for="password1">password : </label>
+        <input type="password" id="password" v-model.trim="password"><br>
+  
+        <input type="submit" value="logIn">
+      </form>
     </div>
-</template>
-
-<script setup>
-import { useCounterStore } from '../stores/counter';
-const store = useCounterStore()
-import { ref } from 'vue';
-
-const id = ref(null)
-const password = ref(null)
-
-const logIn = function () {
-    const user = {
-        id: id.value,
-        pw: password.value
+  </template>
+  
+  <script setup>
+  
+  import { ref } from 'vue';
+  import { useCounterStore } from '@/stores/counter';
+  const store = useCounterStore()
+  const username=ref(null)
+  const password=ref(null)
+  
+  const logIn =function(){
+    const payload={
+      username:username.value,
+      password:password.value,
     }
-    store.logIn(user)
-}
-</script>
-
-<style scoped></style>
+    store.logIn(payload)
+  }
+  </script>
+  
+  <style>
+  
+  </style>
+  

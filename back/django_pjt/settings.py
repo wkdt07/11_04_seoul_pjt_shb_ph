@@ -60,6 +60,8 @@ REST_FRAMEWORK = {
     # 전역 설정
     # Authentication
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        # 'rest_framework.authentication.BasicAuthentication',
+
         'rest_framework.authentication.TokenAuthentication',
         # 기본 인증방식을 토큰으로 하겠다.
     ],
@@ -70,13 +72,14 @@ REST_FRAMEWORK = {
     ],
 }
 CORS_ALLOWED_ORIGINS=[
-    'http://127.0.0.1:8000',
     'http://localhost:5173',
+    'http://127.0.0.1:8000',
+
 ]
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 MIDDLEWARE = [
-    'allauth.account.middleware.AccountMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

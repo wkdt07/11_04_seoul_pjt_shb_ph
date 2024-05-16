@@ -29,15 +29,14 @@ const router = useRouter()
 const createArticle = function () {
     axios({
         method: 'post',
-        url: `http://localhost:5173/articles/`,
-
-        // url: `${store.API_URl}/api/v1/articles/`,
+        url: `${store.API_URl}/articles/`,
         data: {
             title: title.value,
             content: content.value
         },
     }).then((response) => {
         console.log(response.data)
+        router.push({ name: 'ArticleView' })
     }).catch((error) => {
         console.log(error)
     })

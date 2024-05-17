@@ -34,6 +34,7 @@ ALLOWED_HOSTS = [
 AUTH_USER_MODEL = 'accounts.User'
 
 INSTALLED_APPS = [
+    'exchange',
     'compare',
     'allauth.socialaccount',
     'allauth.account',

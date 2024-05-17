@@ -11,6 +11,7 @@
       
     </nav>
   </header>
+  <Map/>
   <RouterView />
   
 
@@ -20,6 +21,7 @@
 import { RouterView, RouterLink } from 'vue-router'
 import { useCounterStore } from './stores/counter';
 import { useRouter } from 'vue-router';
+import Map from '@/components/Map.vue'
 // import Map from './components/Map.vue';
 
 const store = useCounterStore()

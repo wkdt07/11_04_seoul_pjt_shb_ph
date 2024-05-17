@@ -5,11 +5,11 @@ import { ref } from 'vue';
 const map = ref();
 const markerList = ref([]);
 
-const keyWord = ref('강남 은행');
+const keyWord = ref('');
 
 const onLoadKakaoMap = (mapRef) => {
   map.value = mapRef;
-  search(keyWord.value);
+  // search(keyWord.value);
 };
 
 const search = function (keyWord) {

@@ -6,3 +6,5 @@ IAfSKrdJnoyMS13XKyyBN75yJ6NgmXHs
 
 공공데이터포털 키
 a8T35jcnXvB0LAPhYhzpijuU%2BYcuu8AYpck3L1FSmoHiBxNQWw%2FQBQ9qGB7eKKeBxP3VojixO%2F0navzqDV1SIg%3D%3D
+링크
+f'https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey={api_key}&searchdate=20180102&data=AP01'

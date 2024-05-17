@@ -5,6 +5,8 @@
       <RouterLink :to="{ name: 'SignUpView'}">SignUpPage</RouterLink><hr>
       <RouterLink :to="{ name: 'LogInView'}">LogInPage</RouterLink><hr>
       <RouterLink :to="{name:'MapView'}">Map</RouterLink><hr>
+      <RouterLink :to="{name:'DepositListView'}">금리비교</RouterLink><hr>
+
       <button v-if="store.isLogin" @click.prevent="logOut">로그아웃</button>
       
     </nav>

@@ -7,7 +7,6 @@
         <input type="password" id="password1" v-model.trim="password1"><br>
         <label for="password2">password confirmation: </label>
         <input type="password" id="password2" v-model.trim="password2"><br>
-  
         <input type="submit" value="SignUp">
       </form>
     </div>

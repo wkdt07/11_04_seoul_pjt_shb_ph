@@ -7,6 +7,7 @@ import LogInView from '@/views/LogInView.vue'
 import CreateCommentView from '@/views/CreateCommentView.vue'
 import MapView from '@/views/MapView.vue'
 import { useCounterStore } from '@/stores/counter'
+import DepositListView from '@/components/DepositListView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -45,6 +46,11 @@ const router = createRouter({
       path:'/map',
       name:'MapView',
       component:MapView
+    },
+    {
+      path:'/depositList',
+      name:'DepositListView',
+      component:DepositListView
     }
 
 ]

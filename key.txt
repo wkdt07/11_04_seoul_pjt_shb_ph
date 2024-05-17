@@ -1,1 +1,8 @@
+환율 키
+IAfSKrdJnoyMS13XKyyBN75yJ6NgmXHs
+
+카카오맵 키
 62d3a2a99dbd32f2820a6b82de1bcbbc1d25192b
+
+공공데이터포털 키
+a8T35jcnXvB0LAPhYhzpijuU%2BYcuu8AYpck3L1FSmoHiBxNQWw%2FQBQ9qGB7eKKeBxP3VojixO%2F0navzqDV1SIg%3D%3D

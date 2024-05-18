@@ -25,7 +25,7 @@
   onMounted(() => {
     axios({
       method: 'get',
-      url: `${store.API_URL}/articles/${route.params.id}/`
+      url: `${store.DJANGO_URL}/articles/${route.params.id}/`
     })
       .then((response) => {
         // console.log(response.data)

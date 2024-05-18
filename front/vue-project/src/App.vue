@@ -11,7 +11,7 @@
       
     </nav>
   </header>
-  <Map/>
+  <!-- <Map/> -->
   <RouterView />
   
 

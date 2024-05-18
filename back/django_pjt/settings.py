@@ -41,9 +41,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'dj_rest_auth',
     'dj_rest_auth.registration',
-    'allauth.socialaccount',
-    'allauth.account',
     'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
     'django.contrib.sites',
     'corsheaders',
     'rest_framework.authtoken',
@@ -55,9 +55,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 SITE_ID = 1
-
+ACCOUNT_EMAIL_REQUIRED = False  # 이메일 필드를 필수로 설정하지 않음
 ACCOUNT_EMAIL_VERIFICATION = 'none'
-
+ACCOUNT_ADAPTER = 'accounts.models.CustomAccountAdapter'
+# REST-AUTH 회원가입 기본 Serailizer 재정의
+REST_AUTH = {
+'REGISTER_SERIALIZER': 'accounts.serializers.CustomRegisterSerializer',
+'USER_DETAILS_SERIALIZER': 'dj_rest_auth.serializers.UserDetailsSerializer',
+}
 REST_FRAMEWORK = {
     # 전역 설정
     # Authentication
@@ -78,7 +83,7 @@ CORS_ALLOWED_ORIGINS=[
     'http://127.0.0.1:8000',
 
 ]
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'allauth.account.middleware.AccountMiddleware',

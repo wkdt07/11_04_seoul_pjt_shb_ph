@@ -71,7 +71,7 @@ const makeItems = function (item) {
 const getAllDeposit = function () {
   axios({
     method: 'get',
-    url: `${useCounterStore.API_URL}/financial/deposit_list/`
+    url: `${useCounterStore.DJANGO_URL}/financial/deposit_list/`
   })
     .then((res) => {
       const results = res.data
@@ -99,7 +99,7 @@ const clickBank = function () {
   } else {
     axios({
       method: 'get',
-      url: `${useCounterStore.API_URL}/financial/get_bank_deposit/${selectedBank.value}/`
+      url: `${useCounterStore.DJANGO_URL}/financial/get_bank_deposit/${selectedBank.value}/`
     })
       .then((res) => {
         deposits.value = []
@@ -129,7 +129,7 @@ const clickRow = function (data) {
 const getDeposit = function () {
   axios({
     method: 'get',
-    url: `${useCounterStore.API_URL}/financial/deposit_list/${selectedDepositCode.value}/`
+    url: `${useCounterStore.DJANGO_URL}/financial/deposit_list/${selectedDepositCode.value}/`
   })
     .then((res) => {
       const data = res.data
@@ -172,7 +172,7 @@ const getDeposit = function () {
 const addDepositUser = function () {
   axios({
     method: 'post',
-    url: `${userCounterStore.API_URL}/financial/deposit_list/${selectedDepositCode.value}/contract/`,
+    url: `${userCounterStore.DJANGO_URL}/financial/deposit_list/${selectedDepositCode.value}/contract/`,
     headers: {
       Authorization: `Token ${useCounterStore.token}`
     }
@@ -192,7 +192,7 @@ const addDepositUser = function () {
 const deleteDepositUser = function () {
   axios({
     method: 'delete',
-    url: `${useCounterStore.API_URL}/financial/deposit_list/${selectedDepositCode.value}/contract/`,
+    url: `${useCounterStore.DJANGO_URL}/financial/deposit_list/${selectedDepositCode.value}/contract/`,
     headers: {
       Authorization: `Token ${useCounterStore.token}`
     }

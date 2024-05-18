@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-//import { useCounterStore } from '@/stores/counter'
+import { useCounterStore } from '@/stores/counter'
 import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, Colors } from 'chart.js'
 

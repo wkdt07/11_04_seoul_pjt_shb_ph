@@ -4,5 +4,4 @@ from allauth.account.adapter import DefaultAccountAdapter
 # Create your models here.
 
 class User(AbstractUser):
-  
-  pass
+  nickname=models.CharField(max_length=100)

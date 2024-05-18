@@ -8,3 +8,9 @@ IAfSKrdJnoyMS13XKyyBN75yJ6NgmXHs
 a8T35jcnXvB0LAPhYhzpijuU%2BYcuu8AYpck3L1FSmoHiBxNQWw%2FQBQ9qGB7eKKeBxP3VojixO%2F0navzqDV1SIg%3D%3D
 링크
 f'https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey={api_key}&searchdate=20180102&data=AP01'
+
+
+금리 비교 키
+
+074e4e4a11eff3c68e5cd75a1e2b442a
+@content2@

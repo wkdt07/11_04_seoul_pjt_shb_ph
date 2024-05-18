@@ -5,10 +5,9 @@
       <input
         type="text"
         id="username"
-        value="이거 같은데"
         v-model.trim="username"
       /><br />
-      <label for="password1">password : </label>
+      <label for="password">password : </label>
       <input type="password" id="password" v-model.trim="password" /><br />
 
       <input type="submit" value="logIn" />

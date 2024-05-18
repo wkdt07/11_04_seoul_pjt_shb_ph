@@ -4,7 +4,7 @@ import axios from 'axios'
 import { useRouter } from 'vue-router'
 export const useCounterStore = defineStore('counter', () => {
   const articles = ref([])
-  const API_URL = 'http://127.0.0.1:8000'
+  const DJANGO_URL = 'http://127.0.0.1:8000'
   const token=ref(null)
   const route = useRouter()
   const comments = ref([])
@@ -12,7 +12,7 @@ export const useCounterStore = defineStore('counter', () => {
   const getComments = function(){
     axios({
         method:'get',
-        url: `${API_URL}/articles/comments/`,
+        url: `${DJANGO_URL}/articles/comments/`,
         headers:{
             Authorization:`Token ${token.value}`
           }
@@ -23,7 +23,7 @@ export const useCounterStore = defineStore('counter', () => {
   const getArticles = function () {
     axios({
       method: 'get',
-      url: `${API_URL}/articles/`,
+      url: `${DJANGO_URL}/articles/`,
       headers:{
         Authorization:`Token ${token.value}`
       }
@@ -48,9 +48,13 @@ export const useCounterStore = defineStore('counter', () => {
   })
   const logIn = function(payload){
     const {username,password}=payload
+    console.log(payload)
+    console.log(username)
+    console.log(password)
+    
     axios({
       method:'post',
-      url:`${API_URL}/accounts/login/`,
+      url:`${DJANGO_URL}/accounts/login/`,
       data:{
         username,password
       }
@@ -59,7 +63,10 @@ export const useCounterStore = defineStore('counter', () => {
       console.log(res.data) // 이 안에 토큰 데이터가 존재한다. 
       token.value=res.data.key
       route.push({name:'ArticleView'})
-    }).catch(err=>console.log(err))
+    }).catch((err)=>{
+      alert('잘못된 아이디, 혹은 패스워드입니다.\n다시 시도해주세요.')
+      console.log(err)
+    })
   }
   const signUp=function(payload){
     const username = payload.username
@@ -68,7 +75,7 @@ export const useCounterStore = defineStore('counter', () => {
     // const {username,password1,password2}=payload
     axios({
       method:'post',
-      url: `${API_URL}/accounts/signup/`,
+      url: `${DJANGO_URL}/accounts/registration/`,
       data:{
         username,password1,password2
       }
@@ -76,14 +83,18 @@ export const useCounterStore = defineStore('counter', () => {
       console.log('회원가입이 완료되었습니다.')
       const password = password1
       logIn({username,password})
-    }).catch(err=>console.log(err))
+    }).catch((err)=>{
+      alert('잘못된 아이디, 혹은 패스워드입니다.\n다시 시도해주세요.')
+      console.log(err)
+
+    })
 
   }
   const logOut = function(){
     token.value = null
     axios({
       method : 'post',
-      url:`${API_URL}/accounts/logout/`
+      url:`${DJANGO_URL}/accounts/logout/`
     })
   }
 
@@ -92,10 +103,10 @@ export const useCounterStore = defineStore('counter', () => {
     const article_pk=payload.article_pk
     axios({
         method:'post',
-        url:`${API_URL}/articles/${article_pk}/comments/`,
+        url:`${DJANGO_URL}/articles/${article_pk}/comments/`,
         data:{content}
     }).then(res=>console.log('생성완료'))
     .catch(err=>console.log(err))
   }
-  return { articles, API_URL, getArticles,signUp,logIn,token,isLogin,logOut,getComments }
+  return { articles, DJANGO_URL, getArticles,signUp,logIn,token,isLogin,logOut,getComments }
 }, { persist: true })

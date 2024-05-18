@@ -36,7 +36,7 @@ const isContractDeposit = computed(() => {
   return useCounterStore.userInfo?.contract_deposit.some(e => e['deposit_code'] === selectedDepositCode.value)
 })
 
-//const useCounterStore = useCounterStore()
+const useCounterStore = useCounterStore()
 const router = useRouter()
 
 const makeItems = function (item) {

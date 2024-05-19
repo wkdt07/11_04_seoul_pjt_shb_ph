@@ -69,12 +69,8 @@ const getAllDeposit = function () {
   axios.get(`${store.DJANGO_URL}/financial/deposit_list/`)
     .then((res) => {
       const results = res.data
-      for (const item of results){
-        deposits.value.push(makeItems(item))
-        if (!banks.value.includes(item['kor_co_nm'])) {
-          banks.value.push(item['kor_co_nm'])
-        }
-      }
+      deposits.value = results.map(item => makeItems(item))
+      banks.value = ['전체 보기', ...new Set(results.map(item => item.kor_co_nm))]
     })
     .catch((err) => {
       console.log(err)
@@ -91,11 +87,7 @@ const clickBank = function () {
   } else {
     axios.get(`${store.DJANGO_URL}/financial/get_bank_deposit/${selectedBank.value}/`)
       .then((res) => {
-        deposits.value = []
-        const results = res.data
-        for (const item of results){
-          deposits.value.push(makeItems(item))
-        }
+        deposits.value = res.data.map(item => makeItems(item))
       })
       .catch((err) => {
         console.log(err)
@@ -135,18 +127,10 @@ const getDeposit = function () {
       const optionList = data.depositoption_set
 
       for (const option of optionList) {
-        if (option.save_trm === "6") {
-          intrRate.value[0] = option.intr_rate
-          intrRate2.value[0] = option.intr_rate2
-        } else if (option.save_trm === "12") {
-          intrRate.value[1] = option.intr_rate
-          intrRate2.value[1] = option.intr_rate2
-        } else if (option.save_trm === "24") {
-          intrRate.value[2] = option.intr_rate
-          intrRate2.value[2] = option.intr_rate2
-        } else if (option.save_trm === "36") {
-          intrRate.value[3] = option.intr_rate
-          intrRate2.value[3] = option.intr_rate2
+        const idx = parseInt(option.save_trm) / 6 - 1
+        if (idx >= 0 && idx < 4) {
+          intrRate.value[idx] = option.intr_rate
+          intrRate2.value[idx] = option.intr_rate2
         }
       }
     })
@@ -157,11 +141,9 @@ const getDeposit = function () {
 
 const addDepositUser = function () {
   axios.post(`${store.DJANGO_URL}/financial/deposit_list/${selectedDepositCode.value}/contract/`, null, {
-    headers: {
-      Authorization: `Token ${store.token}`
-    }
+    headers: { Authorization: `Token ${store.token}` }
   })
-    .then((res) => {
+    .then(() => {
       store.getUserInfo(store.userInfo.username)
       const answer = window.confirm('저장이 완료되었습니다.\n가입 상품 관리 페이지로 가시겠습니까?')
       if (answer) {
@@ -175,11 +157,9 @@ const addDepositUser = function () {
 
 const deleteDepositUser = function () {
   axios.delete(`${store.DJANGO_URL}/financial/deposit_list/${selectedDepositCode.value}/contract/`, {
-    headers: {
-      Authorization: `Token ${store.token}`
-    }
+    headers: { Authorization: `Token ${store.token}` }
   })
-    .then((res) => {
+    .then(() => {
       store.getUserInfo(store.userInfo.username)
     })
     .catch((err) => {

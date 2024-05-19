@@ -4,7 +4,7 @@ import { useCounterStore } from '@/stores/counter'
 import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, Colors } from 'chart.js'
 
-const useCounterStore = useCounterStore()
+const store = useCounterStore()
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 

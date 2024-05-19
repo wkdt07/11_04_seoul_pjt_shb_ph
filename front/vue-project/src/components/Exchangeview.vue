@@ -5,7 +5,7 @@ import {ref, onMounted, watch} from 'vue'
 import axios from 'axios'
 
 
-const useCounterStore = useCounterStore()
+const store = useCounterStore()
 
 const currency = ref()
 const response = ref()

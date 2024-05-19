@@ -350,174 +350,18 @@
 //     }
 //   };
 
-//   const createComment = async (payload) => {
-//     const { content, article_pk } = payload;
-//     try {
-//       await axios.post(`${DJANGO_URL}/articles/${article_pk}/comments/`, { content }, {
-//         headers: {
-//           Authorization: `Token ${token.value}`
-//         }
-//       });
-//       console.log('댓글 생성 완료');
-//       await getComments(article_pk); // 댓글 생성 후 댓글 목록 갱신
-//     } catch (err) {
-//       console.log(err);
-//     }
-//   };
-
-//   return { 
-//     articles, 
-//     getArticles, 
-//     signUp, 
-//     logIn, 
-//     token, 
-//     isLogin, 
-//     logOut, 
-//     comments,
-//     getComments, 
-//     createComment 
-//   };
-// }, { persist: true });
-
-
-// // 이전에 통합하기 전에 성공한 코드
-// import { ref, computed } from 'vue';
-// import { defineStore } from 'pinia';
-// import axios from 'axios';
-
-// const DJANGO_URL = 'http://127.0.0.1:8000';
-
-// export const useCounterStore = defineStore('counter', () => {
-//   const articles = ref([]);
-//   const token = ref(null);
-//   const comments = ref([]);
-
-//   const getComments = async (article_pk) => {
-//     try {
-//       const response = await axios.get(`${DJANGO_URL}/articles/${article_pk}/comments/`, {
-//         headers: {
-//           Authorization: `Token ${token.value}`
-//         }
-//       });
-//       comments.value = response.data;
-//     } catch (err) {
-//       console.log(err);
-//     }
-//   };
-
-//   const getArticles = async () => {
-//     try {
-//       const response = await axios.get(`${DJANGO_URL}/articles/`, {
-//         headers: {
-//           Authorization: `Token ${token.value}`
-//         }
-//       });
-//       articles.value = response.data;
-//     } catch (error) {
-//       console.log(error);
-//     }
-//   };
-
-//   const getArticle = async (article_pk) => {
-//     try {
-//       const response = await axios.get(`${DJANGO_URL}/articles/${article_pk}/`, {
-//         headers: {
-//           Authorization: `Token ${token.value}`
-//         }
-//       });
-//       return response.data;
-//     } catch (error) {
-//       console.log(error);
-//     }
-//   };
-
-//   const isLogin = computed(() => {
-//     return token.value !== null;
-//   });
-
-//   const logIn = async (payload) => {
-//     const { username, password } = payload;
-//     try {
-//       const res = await axios.post(`${DJANGO_URL}/accounts/login/`, { username, password });
-//       console.log('로그인이 완료되었습니다.');
-//       token.value = res.data.key;
-//     } catch (err) {
-//       alert('잘못된 아이디, 혹은 패스워드입니다.\n다시 시도해주세요.');
-//       console.log(err);
-//     }
-//   };
-
-//   const signUp = async (payload) => {
-//     const {
-//       username,
-//       password1,
-//       password2,
-//       email,
-//       name,
-//       age,
-//       now_money,
-//       money_per_year,
-//       fav_place
-//     } = payload;
-//     try {
-//       await axios.post(`${DJANGO_URL}/accounts/registration/`, {
-//         username,
-//         password1,
-//         password2,
-//         email,
-//         name,
-//         age,
-//         now_money,
-//         money_per_year,
-//         fav_place
-//       });
-//       console.log('회원가입이 완료되었습니다.');
-//       const password = password1;
-//       await logIn({ username, password });
-//     } catch (err) {
-//       alert('잘못된 아이디, 혹은 패스워드입니다.\n다시 시도해주세요.');
-//       console.log(err);
-//     }
-//   };
-
-//   const logOut = async () => {
-//     token.value = null;
-//     try {
-//       await axios.post(`${DJANGO_URL}/accounts/logout/`);
-//     } catch (err) {
-//       console.log(err);
-//     }
-//   };
-
-//   const createComment = async (payload) => {
-//     const { content, article_pk } = payload;
-//     try {
-//       await axios.post(`${DJANGO_URL}/articles/${article_pk}/comments/`, { content }, {
-//         headers: {
-//           Authorization: `Token ${token.value}`
-//         }
-//       });
-//       console.log('댓글 생성 완료');
-//       await getComments(article_pk); // 댓글 생성 후 댓글 목록 갱신
-//     } catch (err) {
-//       console.log(err);
-//     }
-//   };
-
-//   return { 
-//     articles, 
-//     getArticles, 
-//     getArticle,
-//     signUp, 
-//     logIn, 
-//     token, 
-//     isLogin, 
-//     logOut, 
-//     comments,
-//     getComments, 
-//     createComment 
-//   };
-// }, { persist: true });
+//   const createComment=function(payload){
+//     const content = payload.content
+//     const article_pk=payload.article_pk
+//     axios({
+//         method:'post',
+//         url:`${DJANGO_URL}/articles/${article_pk}/comments/`,
+//         data:{content}
+//     }).then(res=>console.log('생성완료'))
+//     .catch(err=>console.log(err))
+//   }
+//   return { articles, DJANGO_URL, getArticles,signUp,logIn,token,isLogin,logOut,getComments }
+// }, { persist: true })
 import { ref, computed, watch } from 'vue';
 import { defineStore } from 'pinia';
 import axios from 'axios';
@@ -542,7 +386,6 @@ export const useCounterStore = defineStore('counter', () => {
     userContractSavings.value = userInfo.value?.contract_saving;
   });
 
-  // 사용자 정보를 가져오는 함수
   const getUserInfo = async (username) => {
     try {
       const response = await axios.get(`${DJANGO_URL}/users/${username}/info/`, {
@@ -555,7 +398,6 @@ export const useCounterStore = defineStore('counter', () => {
       console.log(err);
     }
   };
-
   const getComments = async (article_pk) => {
     try {
       const response = await axios.get(`${DJANGO_URL}/articles/${article_pk}/comments/`, {
@@ -568,7 +410,7 @@ export const useCounterStore = defineStore('counter', () => {
       console.log(err);
     }
   };
-
+  // 사용자 정보를 가져오는 함수
   const getArticles = async () => {
     try {
       const response = await axios.get(`${DJANGO_URL}/articles/`, {
@@ -648,10 +490,9 @@ export const useCounterStore = defineStore('counter', () => {
 
   const logOut = async () => {
     token.value = null;
+    userInfo.value = null;
     try {
       await axios.post(`${DJANGO_URL}/accounts/logout/`);
-      token.value = null;
-      userInfo.value = [];
       router.push({ name: 'home' });
     } catch (err) {
       console.log(err);
@@ -668,6 +509,20 @@ export const useCounterStore = defineStore('counter', () => {
       });
       console.log('댓글 생성 완료');
       await getComments(article_pk); // 댓글 생성 후 댓글 목록 갱신
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // 사용자 정보를 가져오는 함수
+  const getUserInfo = async (username) => {
+    try {
+      const res = await axios.get(`${DJANGO_URL}/users/${username}/info/`, {
+        headers: {
+          Authorization: `Token ${token.value}`
+        }
+      });
+      userInfo.value = res.data;
     } catch (err) {
       console.log(err);
     }

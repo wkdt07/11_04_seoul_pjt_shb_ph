@@ -6,8 +6,6 @@ import BarChartDetail from '@/components/BarChartDetailView.vue'
 import axios from 'axios'
 
 
-const store = useCounterStore()
-const router = useRouter()
 const headers = [
   { title: '공시 제출일', align: 'start', sortable: false, width:'10%', key: 'dcls_month' },
   { title: '금융회사명', align: 'start', sortable: false, key: 'kor_co_nm' },

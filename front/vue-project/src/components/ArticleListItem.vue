@@ -6,9 +6,11 @@
       <RouterLink 
         :to="{ name: 'DetailView', params: { id: article.id }}"
       >
-        [DETAIL]
-      </RouterLink>
-      <!-- <CommentList
+      [DETAIL]
+    </RouterLink>
+    {{ article }}
+    <!-- 조회용
+      <CommentList
       :article_pk="article.id"
       /> -->
       <!-- <RouterLink :to="{name:'createComment',params: { article_pk: article.id }}"></RouterLink>

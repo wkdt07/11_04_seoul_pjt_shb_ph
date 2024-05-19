@@ -1,10 +1,13 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useCounterStore } from '@/stores/counter'
+import { useCounterStore } from '../stores/counter'
 import BarChartDetail from '@/components/BarChartDetailView.vue'
 import axios from 'axios'
 
+
+const store = useCounterStore()
+const router = useRouter()
 const headers = [
   { title: '공시 제출일', align: 'start', sortable: false, width:'10%', key: 'dcls_month' },
   { title: '금융회사명', align: 'start', sortable: false, key: 'kor_co_nm' },
@@ -33,11 +36,8 @@ const intrRate = ref([null, null, null, null])
 const intrRate2 = ref([null, null, null, null])
 
 const isContractDeposit = computed(() => {
-  return useCounterStore.userInfo?.contract_deposit.some(e => e['deposit_code'] === selectedDepositCode.value)
+  return store.userInfo?.contract_deposit.some(e => e['deposit_code'] === selectedDepositCode.value)
 })
-
-const useCounterStore = useCounterStore()
-const router = useRouter()
 
 const makeItems = function (item) {
   const result = {
@@ -71,7 +71,7 @@ const makeItems = function (item) {
 const getAllDeposit = function () {
   axios({
     method: 'get',
-    url: `${useCounterStore.DJANGO_URL}/financial/deposit_list/`
+    url: `${store.DJANGO_URL}/financial/deposit_list/`
   })
     .then((res) => {
       const results = res.data
@@ -99,7 +99,7 @@ const clickBank = function () {
   } else {
     axios({
       method: 'get',
-      url: `${useCounterStore.DJANGO_URL}/financial/get_bank_deposit/${selectedBank.value}/`
+      url: `${store.DJANGO_URL}/financial/get_bank_deposit/${selectedBank.value}/`
     })
       .then((res) => {
         deposits.value = []
@@ -129,7 +129,7 @@ const clickRow = function (data) {
 const getDeposit = function () {
   axios({
     method: 'get',
-    url: `${useCounterStore.DJANGO_URL}/financial/deposit_list/${selectedDepositCode.value}/`
+    url: `${store.DJANGO_URL}/financial/deposit_list/${selectedDepositCode.value}/`
   })
     .then((res) => {
       const data = res.data
@@ -172,13 +172,13 @@ const getDeposit = function () {
 const addDepositUser = function () {
   axios({
     method: 'post',
-    url: `${userCounterStore.DJANGO_URL}/financial/deposit_list/${selectedDepositCode.value}/contract/`,
+    url: `${store.DJANGO_URL}/financial/deposit_list/${selectedDepositCode.value}/contract/`,
     headers: {
-      Authorization: `Token ${useCounterStore.token}`
+      Authorization: `Token ${store.token}`
     }
   })
     .then((res) => {
-      useCounterStore.getUserInfo(useCounterStore.userInfo.username)
+      store.getUserInfo(store.userInfo.username)
       const answer = window.confirm('저장이 완료되었습니다.\n가입 상품 관리 페이지로 가시겠습니까?')
       if (answer) {
         router.push({ name: 'productManage', params: { username: userStore.userInfo.username }})
@@ -192,13 +192,13 @@ const addDepositUser = function () {
 const deleteDepositUser = function () {
   axios({
     method: 'delete',
-    url: `${useCounterStore.DJANGO_URL}/financial/deposit_list/${selectedDepositCode.value}/contract/`,
+    url: `${store.DJANGO_URL}/financial/deposit_list/${selectedDepositCode.value}/contract/`,
     headers: {
-      Authorization: `Token ${useCounterStore.token}`
+      Authorization: `Token ${store.token}`
     }
   })
     .then((res) => {
-      useCounterStore.getUserInfo(useCounterStore.userInfo.username)
+      store.getUserInfo(store.userInfo.username)
     })
     .catch((err) => {
       console.log(err)
@@ -230,7 +230,7 @@ const deleteDepositUser = function () {
       <v-card v-if="selectedDeposit" class="py-5 px-3">
         <v-card-title class="d-flex align-center justify-space-between">
           <h3>{{ selectedDeposit['금융 상품명'] }}</h3>
-          <div v-if="useCounterStore.isLogin">
+          <div v-if="store.isLogin">
             <v-btn
               v-if=" isContractDeposit"
               color="red"

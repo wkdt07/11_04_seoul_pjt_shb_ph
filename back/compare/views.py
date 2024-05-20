@@ -13,8 +13,8 @@ import requests
 from .serializer import *
 from .models import *
 #from accounts.serializers import *
-BANK_API_KEY = '074e4e4a11eff3c68e5cd75a1e2b442a'
 def make_financial_data(request):
+    BANK_API_KEY = '074e4e4a11eff3c68e5cd75a1e2b442a'
     DEPOSIT_API_URL = f'http://finlife.fss.or.kr/finlifeapi/depositProductsSearch.json?auth={BANK_API_KEY}&topFinGrpNo=020000&pageNo=1'
     SAVING_API_URL = f'http://finlife.fss.or.kr/finlifeapi/savingProductsSearch.json?auth={BANK_API_KEY}&topFinGrpNo=020000&pageNo=1'
 

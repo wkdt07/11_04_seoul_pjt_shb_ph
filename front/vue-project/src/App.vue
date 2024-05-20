@@ -11,6 +11,8 @@
     store.logOut()
     router.push({name:'LogInView'})
   }
+
+  console.log(store.userInfo)
   
   // if (store.isLogin) {
   //   store.getUserInfo(); 
@@ -27,18 +29,22 @@
       <RouterLink :to="{ name: 'LogInView'}">LogInPage</RouterLink><hr>
       <RouterLink :to="{name:'MapView'}">Map</RouterLink><hr>
       <RouterLink :to="{name:'DepositListView'}">금리비교</RouterLink><hr>
-      <RouterLink v-if="store.isLogin && store.userInfo" :to="{name:'ProfileView',params:{username:store.userInfo.username}}" >
-      {{ store.userInfo.username }}의 프로필</RouterLink> 
+      <RouterLink :to="{name:'ExchangeView'}">환율계산기</RouterLink><hr>
+      <RouterLink v-if="store.userInfo" :to="{name:'ProfileView',params:{username:store.userInfo.username}}" >
+      {{ store.userInfo.username }}의 프로필</RouterLink> <hr>
+
+      
       <button v-if="store.isLogin" @click.prevent="logOut">로그아웃</button>
       
     </nav>
   </header>
   <!-- <Map/> -->
   <RouterView />
-  
+  <!-- v-if="store.isLogin && store.userInfo"  -->
 
 </template>
 
 
 <style scoped>
+
 </style>

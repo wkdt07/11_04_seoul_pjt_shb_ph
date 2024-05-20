@@ -38,7 +38,7 @@ const createArticle = function () {
     data: {
       title: title.value,
       content: content.value
-    },
+    },  
     headers:{
         Authorization:`Token ${store.token}`
     }

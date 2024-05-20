@@ -2,7 +2,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from allauth.account.adapter import DefaultAccountAdapter
-
+from compare.models import Deposit,Saving
 class User(AbstractUser):
     username = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=50)
@@ -18,6 +18,8 @@ class User(AbstractUser):
     saving_period = models.IntegerField(blank=True, null=True)
     fav_place = models.CharField(max_length=100, blank=True, null=True)  # 선택 사항
     is_superuser = models.BooleanField(default=False)
+    deposits = models.ManyToManyField(Deposit,related_name='users',blank=True)
+    savings = models.ManyToManyField(Saving,related_name='user',blank=True)
 
     USERNAME_FIELD = 'username'
 

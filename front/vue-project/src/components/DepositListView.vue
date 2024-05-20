@@ -29,14 +29,13 @@ const averageIntrRate = [3.45, 4.08, 3.4, 3.35]
 const intrRate = ref([null, null, null, null])
 const intrRate2 = ref([null, null, null, null])
 
-
-const store = useCounterStore()
-const router = useRouter()
-
 const isContractDeposit = computed(() => {
   const userInfo = useCounterStore().userInfo
   return userInfo ? userInfo.contract_deposit.some(e => e['deposit_code'] === selectedDepositCode.value) : false
 })
+
+const store = useCounterStore()
+const router = useRouter()
 
 const makeItems = function (item) {
   const result = {
@@ -50,22 +49,18 @@ const makeItems = function (item) {
     '36month': null,
   }
 
-  if (Array.isArray(item['depositoption_set'])) {
-    for (const option of item['depositoption_set']) {
-      const saveTrm = option['save_trm']
+  for (const option of item['depositoption_set']) {
+    const saveTrm = option['save_trm']
 
-      if (saveTrm === "6") {
-        result['6month'] = option['intr_rate']
-      } else if (saveTrm === "12") {
-        result['12month'] = option['intr_rate']
-      } else if (saveTrm === "24") {
-        result['24month'] = option['intr_rate']
-      } else if (saveTrm === "36") {
-        result['36month'] = option['intr_rate']
-      }
+    if (saveTrm === "6") {
+      result['6month'] = option['intr_rate']
+    } else if (saveTrm === "12") {
+      result['12month'] = option['intr_rate']
+    } else if (saveTrm === "24") {
+      result['24month'] = option['intr_rate']
+    } else if (saveTrm === "36") {
+      result['36month'] = option['intr_rate']
     }
-  } else {
-    console.warn('depositoption_set is not iterable:', item['depositoption_set'])
   }
 
   return result
@@ -74,10 +69,7 @@ const makeItems = function (item) {
 const getAllDeposit = function () {
   axios.get(`${store.DJANGO_URL}/financial/deposit_list/`)
     .then((res) => {
-      // console.log(`${store.DJANGO_URL}/financial/deposit_list/`)
-      console.log('response=',res)
       const results = res.data
-      console.log('results=',results)
       for (const item of results){
         deposits.value.push(makeItems(item))
         if (!banks.value.includes(item['kor_co_nm'])) {
@@ -143,24 +135,20 @@ const getDeposit = function () {
       }
       const optionList = data.depositoption_set
 
-      if (Array.isArray(optionList)) {
-        for (const option of optionList) {
-          if (option.save_trm === "6") {
-            intrRate.value[0] = option.intr_rate
-            intrRate2.value[0] = option.intr_rate2
-          } else if (option.save_trm === "12") {
-            intrRate.value[1] = option.intr_rate
-            intrRate2.value[1] = option.intr_rate2
-          } else if (option.save_trm === "24") {
-            intrRate.value[2] = option.intr_rate
-            intrRate2.value[2] = option.intr_rate2
-          } else if (option.save_trm === "36") {
-            intrRate.value[3] = option.intr_rate
-            intrRate2.value[3] = option.intr_rate2
-          }
+      for (const option of optionList) {
+        if (option.save_trm === "6") {
+          intrRate.value[0] = option.intr_rate
+          intrRate2.value[0] = option.intr_rate2
+        } else if (option.save_trm === "12") {
+          intrRate.value[1] = option.intr_rate
+          intrRate2.value[1] = option.intr_rate2
+        } else if (option.save_trm === "24") {
+          intrRate.value[2] = option.intr_rate
+          intrRate2.value[2] = option.intr_rate2
+        } else if (option.save_trm === "36") {
+          intrRate.value[3] = option.intr_rate
+          intrRate2.value[3] = option.intr_rate2
         }
-      } else {
-        console.warn('depositoption_set is not iterable:', optionList)
       }
     })
     .catch((err) => {
@@ -169,43 +157,35 @@ const getDeposit = function () {
 }
 
 const addDepositUser = function () {
-  if (store.userInfo && store.userInfo.username) {
-    axios.post(`${store.DJANGO_URL}/financial/deposit_list/${selectedDepositCode.value}/contract/`, null, {
-      headers: {
-        Authorization: `Token ${store.token}`
+  axios.post(`${store.DJANGO_URL}/financial/deposit_list/${selectedDepositCode.value}/contract/`, null, {
+    headers: {
+      Authorization: `Token ${store.token}`
+    }
+  })
+    .then((res) => {
+      store.getUserInfo(store.userInfo.username)
+      const answer = window.confirm('저장이 완료되었습니다.\n가입 상품 관리 페이지로 가시겠습니까?')
+      if (answer) {
+        router.push({ name: 'productManage', params: { username: store.userInfo.username } })
       }
     })
-      .then((res) => {
-        store.getUserInfo(store.userInfo.username)
-        const answer = window.confirm('저장이 완료되었습니다.\n가입 상품 관리 페이지로 가시겠습니까?')
-        if (answer) {
-          router.push({ name: 'productManage', params: { username: store.userInfo.username } })
-        }
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-  } else {
-    console.error('User info is not available.')
-  }
+    .catch((err) => {
+      console.log(err)
+    })
 }
 
 const deleteDepositUser = function () {
-  if (store.userInfo && store.userInfo.username) {
-    axios.delete(`${store.DJANGO_URL}/financial/deposit_list/${selectedDepositCode.value}/contract/`, {
-      headers: {
-        Authorization: `Token ${store.token}`
-      }
+  axios.delete(`${store.DJANGO_URL}/financial/deposit_list/${selectedDepositCode.value}/contract/`, {
+    headers: {
+      Authorization: `Token ${store.token}`
+    }
+  })
+    .then((res) => {
+      store.getUserInfo(store.userInfo.username)
     })
-      .then((res) => {
-        store.getUserInfo(store.userInfo.username)
-      })
-      .catch((err) => {
-        console.log(err)
-      })
-  } else {
-    console.error('User info is not available.')
-  }
+    .catch((err) => {
+      console.log(err)
+    })
 }
 </script>
 

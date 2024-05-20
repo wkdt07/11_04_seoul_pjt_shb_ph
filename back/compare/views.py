@@ -13,13 +13,12 @@ import requests
 from .serializer import *
 from .models import *
 #from accounts.serializers import *
-BANK_API_KEY = '074e4e4a11eff3c68e5cd75a1e2b442a'
+
 def make_financial_data(request):
-    DEPOSIT_API_URL = f'http://finlife.fss.or.kr/finlifeapi/depositProductsSearch.json?auth={BANK_API_KEY}&topFinGrpNo=020000&pageNo=1'
-    SAVING_API_URL = f'http://finlife.fss.or.kr/finlifeapi/savingProductsSearch.json?auth={BANK_API_KEY}&topFinGrpNo=020000&pageNo=1'
+    DEPOSIT_API_URL = f'http://finlife.fss.or.kr/finlifeapi/depositProductsSearch.json?auth={settings.BANK_API_KEY}&topFinGrpNo=020000&pageNo=1'
+    SAVING_API_URL = f'http://finlife.fss.or.kr/finlifeapi/savingProductsSearch.json?auth={settings.BANK_API_KEY}&topFinGrpNo=020000&pageNo=1'
 
     deposit_res = requests.get(DEPOSIT_API_URL).json()
-    print(request)
     deposit_baseList = deposit_res.get('result').get('baseList')
     deposit_optionList = deposit_res.get('result').get('optionList')
 

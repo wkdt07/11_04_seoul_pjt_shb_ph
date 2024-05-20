@@ -380,24 +380,13 @@ export const useCounterStore = defineStore('counter', () => {
   const userContractDeposits = ref(null);
   const userContractSavings = ref(null);
 
-  
-  const isLogin = computed(() => {
-    return token.value !== null;
-  });
   // 사용자 정보 변경 감지
   watch(userInfo, () => {
     userContractDeposits.value = userInfo.value?.contract_deposit || [];
     userContractSavings.value = userInfo.value?.contract_saving || [];
-  });
+  });  
 
-  watch(isLogin,(newVal)=>{
-    if (newVal){
-      getUserInfo()
-    }
-  })
-
-  const getUserInfo = async () => {
-    if(!userInfo.value) return;
+  const getUserInfo = async (username) => {
     try {
       const response = await axios.get(`${DJANGO_URL}/users/${username}/info/`, {
         headers: {
@@ -421,7 +410,7 @@ export const useCounterStore = defineStore('counter', () => {
       console.log(err);
     }
   };
-
+  // 사용자 정보를 가져오는 함수
   const getArticles = async () => {
     try {
       const response = await axios.get(`${DJANGO_URL}/articles/`, {
@@ -448,6 +437,9 @@ export const useCounterStore = defineStore('counter', () => {
     }
   };
 
+  const isLogin = computed(() => {
+    return token.value !== null;
+  });
 
   const logIn = async (payload) => {
     const { username, password } = payload;
@@ -455,17 +447,7 @@ export const useCounterStore = defineStore('counter', () => {
       const res = await axios.post(`${DJANGO_URL}/accounts/login/`, { username, password });
       console.log('로그인이 완료되었습니다.');
       token.value = res.data.key;
-  
-      // 로그인 후 사용자 정보 가져오기
-      const userInfoResponse = await axios.get(`${DJANGO_URL}/users/${username}/info/`, {
-        headers: {
-          Authorization: `Token ${token.value}`
-        }
-      });
-      userInfo.value = userInfoResponse.data;
-      userContractDeposits.value = userInfo.value.contract_deposit || [];
-      userContractSavings.value = userInfo.value.contract_saving || [];
-  
+      await getUserInfo(username);
       router.push({ name: 'ArticleView' });
     } catch (err) {
       alert('잘못된 아이디, 혹은 패스워드입니다.\n다시 시도해주세요.');
@@ -506,10 +488,16 @@ export const useCounterStore = defineStore('counter', () => {
     }
   };
 
-  const logOut = () => {
-    token.value = null;
-    userInfo.value = null;
-    router.push({ name: 'LogInView' });
+  const logOut = async () => {
+
+    try {
+      await axios.post(`${DJANGO_URL}/accounts/logout/`);
+      token.value = null;
+      userInfo.value = null;
+      router.push({ name: 'home' });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const createComment = async (payload) => {
@@ -527,38 +515,8 @@ export const useCounterStore = defineStore('counter', () => {
     }
   };
 
-  // 사용자 정보를 가져오는 함수
-  const userArticles = ref(null)
-  const userComments = ref(null)
-  const getUserArticles = async (userId) => {
-    try {
-      const response = await axios.get(`${DJANGO_URL}/accounts/${userId}/articles/`, {
-        headers: {
-          Authorization: `Token ${token.value}`
-        }
-      });
-      userArticles.value = response.data;
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  const getUserComments = async (userId) => {
-    try {
-      const response = await axios.get(`${DJANGO_URL}/accounts/${userId}/comments/`, {
-        headers: {
-          Authorization: `Token ${token.value}`
-        }
-      });
-      userComments.value = response.data;
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
-  return {
-    getUserArticles,
-    getUserComments,
-    DJANGO_URL, 
+  return { 
     articles, 
     getArticles, 
     getArticle,

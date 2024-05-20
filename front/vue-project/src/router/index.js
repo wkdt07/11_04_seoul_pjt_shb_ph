@@ -8,7 +8,6 @@ import CreateCommentView from '@/views/CreateCommentView.vue'
 import MapView from '@/views/MapView.vue'
 import { useCounterStore } from '@/stores/counter'
 import DepositListView from '@/components/DepositListView.vue'
-import ProfileView from '../views/ProfileView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -53,12 +52,6 @@ const router = createRouter({
       name:'DepositListView',
       component:DepositListView
     }
-    ,
-    {
-      path:'/profile/:username',
-      name:'ProfileView',
-      component:ProfileView
-    }
 
 ]
 })
@@ -75,6 +68,9 @@ router.beforeEach((to,from)=>{
     window.alert('이미 로그인이 되어있습니다')
     return {name:'ArticleView'}
   }
-
+  if ((to.name ==='LogOutView')&& !store.isLogin){
+    window.alert('아직 로그인하지 않았습니다.')
+    return {name:'LogInView'}
+  }
 })
 export default router

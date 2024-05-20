@@ -1,129 +1,130 @@
-
 <script setup>
-import { useCounterStore } from '../stores/counter'
-import {ref, onMounted, watch} from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
-
+import { useCounterStore } from '../stores/counter';
 
 const store = useCounterStore()
 
-const currency = ref()
-const response = ref()
+const currency = ref([])
+const response = ref([])
 const getorgive = ref('송금 받을 때')
-const selectCur  = ref('미 달러')
+const selectCur = ref('미 달러')
 const selectCurUnit = ref('USD')
-const Ttb = ref()
-const Tts = ref() 
-const Deal = ref() 
+const Ttb = ref(0)
+const Tts = ref(0)
+const Deal = ref(0)
 
+const carculate = ref(0)
+const inputwon = ref(0)
+const others = ref(0)
 
-const carculate = ref()
-const inputwon = ref()
-const others = ref()
-
-const selections = ['현찰 살 때', '현찰 팔 때', '매매 기준율']
+const selections = ['송금 받을 때', '송금 보낼 때', '매매 기준율']
 
 const emit = defineEmits(['ExCurrency'])
 
+onMounted(async () => {
+  try {
+    const res = await axios.get(`${store.DJANGO_URL}/exchange/get_exchange_data/`) // API URL 수정
+    console.log('API 응답:', res.data) // 디버그: API 응답 확인
 
-onMounted(() => {
-  axios({
-    method: 'get',
-    url: `${useCounterStore.API_URL}/exchange/`
-  })
-    .then((res) => {
-      response.value = res.data.filter(data => data['ttb'] !== '0')
+    response.value = res.data.filter(data => data['ttb'] !== '0')
+    console.log('필터링된 응답:', response.value) // 디버그: 필터링된 응답 확인
 
+    if (response.value.length > 0) {
       currency.value = response.value.map(item => item['cur_nm'])
       const units = response.value.map(item => item['cur_unit'])
       emit('ExCurrency', currency.value, units)
-      const usdInfo = response.value.find(item => item['cur_nm'] === '미 달러')
-      Ttb.value = Number(usdInfo['ttb'].replaceAll(',', ''))
-      Tts.value = Number(usdInfo['tts'].replaceAll(',', ''))
-      Deal.value = Number(usdInfo['deal_bas_r'].replaceAll(',', ''))
-      carculate.value = Ttb.value
-    })
+
+      // '미 달러' 정보를 초기 설정
+      const usdInfo = response.value.find(item => item['cur_nm'] === '미국 달러')
+      if (usdInfo) {
+        selectCurUnit.value = usdInfo['cur_unit']
+        Ttb.value = Number(usdInfo['ttb'].replaceAll(',', ''))
+        Tts.value = Number(usdInfo['tts'].replaceAll(',', ''))
+        Deal.value = Number(usdInfo['deal_bas_r'].replaceAll(',', ''))
+        // 초기 값 설정 (선택된 통화와 상관 없이 Ttb로 설정하지 않음)
+        updateCarculate()
+      } else {
+        console.error('USD 정보를 응답에서 찾을 수 없습니다.') // 오류 처리: USD 정보를 찾을 수 없음
+      }
+    } else {
+      console.error('필터링 후 데이터를 찾을 수 없습니다.') // 오류 처리: 필터링 후 데이터를 찾을 수 없음
+    }
+  } catch (error) {
+    console.error('환율 데이터를 가져오는 중 오류가 발생했습니다:', error) // 오류 처리: 오류 로그 출력
+  }
 })
 
-watch(selectCur, () => {
-  const selectedData = response.value.find(item => item['cur_nm']=== selectCur.value)
-  selectCur.value = selectedData['cur_unit']
-  if(selectCur.value === '일본 옌' || selectCur.value === '인도네시아 루피아'){
-    selectCurUnit.value = selectCurUnit.value.replace('(100)', '')
-    Ttb.value = Number(selectedData['ttb'].replaceAll(',', '')) / 100
-    Tts.value = Number(selectedData['tts'].replaceAll(',', '')) / 100
-    Deal.value = Number(selectedData['deal_bas_r'].replaceAll(',', '')) / 100
+watch([selectCur, getorgive], () => {
+  const selectedData = response.value.find(item => item['cur_nm'] === selectCur.value)
+  if (selectedData) {
+    selectCurUnit.value = selectedData['cur_unit']
+    if (selectCur.value === '일본 옌' || selectCur.value === '인도네시아 루피아') {
+      Ttb.value = Number(selectedData['ttb'].replaceAll(',', '')) / 100
+      Tts.value = Number(selectedData['tts'].replaceAll(',', '')) / 100
+      Deal.value = Number(selectedData['deal_bas_r'].replaceAll(',', '')) / 100
+    } else {
+      Ttb.value = Number(selectedData['ttb'].replaceAll(',', ''))
+      Tts.value = Number(selectedData['tts'].replaceAll(',', ''))
+      Deal.value = Number(selectedData['deal_bas_r'].replaceAll(',', ''))
+    }
+    updateCarculate()
+    inputEventOther()
   } else {
-    Ttb.value = Number(selectedData['ttb'].replaceAll(',',''))
-    Tts.value = Number(selectedData['tts'].replaceAll(',',''))
-    Deal.value = Number(selectedData['deal_bas_r'].replaceAll(',',''))
+    console.error('선택된 통화 데이터를 찾을 수 없습니다.') // 오류 처리: 선택된 통화 데이터를 찾을 수 없음
   }
-  if (getorgive.value === '송금 받으실 때') {
+})
+
+const updateCarculate = () => {
+  if (getorgive.value === '송금 받을 때') {
     carculate.value = Ttb.value
-  } else if (getorgive.value === '송금 보내실 때') {
+  } else if (getorgive.value === '송금 보낼 때') {
     carculate.value = Tts.value
   } else {
     carculate.value = Deal.value
   }
-  inputEventOther()
-})
+}
+
+const inputEventOther = () => {
+  inputwon.value = others.value * carculate.value
+}
+
+const inputEventKrw = () => {
+  others.value = inputwon.value / carculate.value
+}
 
 </script>
 
 
+
 <template>
   <div class="card">
-    <!-- 카드를 사용하여 콘텐츠를 감싸는 컨테이너를 만듭니다 -->
     <form @submit.prevent="submitForm">
-      <!-- 폼을 만듭니다 -->
       <div class="container">
-        <!-- 레이아웃을 위한 컨테이너 -->
         <div class="row">
-          <!-- 한 줄을 만듭니다 -->
           <div class="col" :class="{ 'offset-9': true, 'col-3': true }">
-            <!-- 3칸을 차지하며 오른쪽으로 9칸 오프셋되는 열을 만듭니다 -->
             <label for="state-select">기준</label>
             <select id="state-select" v-model="getorgive">
               <option v-for="state in selections" :key="state" :value="state">{{ state }}</option>
             </select>
-            <!-- 기준을 선택하는 드롭다운 메뉴 -->
           </div>
         </div>
-
         <div class="row">
-          <!-- 한 줄을 만듭니다 -->
           <div class="col-3">
-            <!-- 3칸을 차지하는 열을 만듭니다 -->
             <label for="currency-select">통화 선택</label>
             <select id="currency-select" v-model="selectCur">
               <option v-for="cur in currency" :key="cur" :value="cur">{{ cur }}</option>
             </select>
-            <!-- 통화를 선택하는 드롭다운 메뉴 -->
           </div>
           <div class="col-9">
-            <!-- 9칸을 차지하는 열을 만듭니다 -->
             <label :for="selectCurUnit">금액</label>
-            <input
-              type="number"
-              :id="selectCurUnit"
-              v-model="others"
-              @input="inputEventOther"
-            />
-            <!-- 통화 금액을 입력하는 입력 필드 -->
+            <input type="number" :id="selectCurUnit" v-model="others" @input="inputEventOther" />
           </div>
         </div>
-
         <div class="row">
-          <!-- 한 줄을 만듭니다 -->
           <div class="col-12">
             <label for="krw-input">KRW</label>
-            <input
-              type="number"
-              id="krw-input"
-              v-model="inputwon"
-              @input="inputEventKrw"
-            />
-            <!-- 원화 금액을 입력하는 입력 필드 -->
+            <input type="number" id="krw-input" v-model="inputwon" @input="inputEventKrw" />
           </div>
         </div>
       </div>
@@ -175,9 +176,12 @@ label {
 }
 
 input[type="number"] {
-  -webkit-appearance: none; /* Webkit 브라우저 (Chrome, Safari) */
-  -moz-appearance: textfield; /* Firefox 브라우저 */
-  appearance: none; /* 표준 속성 */
+  -webkit-appearance: none;
+  /* Webkit 브라우저 (Chrome, Safari) */
+  -moz-appearance: textfield;
+  /* Firefox 브라우저 */
+  appearance: none;
+  /* 표준 속성 */
 }
 
 input[type="number"]::-webkit-outer-spin-button,

@@ -6,13 +6,13 @@ import BarChartDetail from '@/components/BarChartDetailView.vue'
 import axios from 'axios'
 
 const headers = [
-  { title: '공시 제출일', align: 'start', sortable: false, width:'10%', key: 'dcls_month' },
+  { title: '공시 제출일', align: 'start', sortable: false, width: '10%', key: 'dcls_month' },
   { title: '금융회사명', align: 'start', sortable: false, key: 'kor_co_nm' },
-  { title: '상품명', align: 'center', sortable: false, width:'32%', key: 'name' },
-  { title: '6개월 (Click to sort)', align: 'end', width:'12%', key: '6month' },
-  { title: '12개월 (Click to sort)', align: 'end', width:'12%', key: '12month' },
-  { title: '24개월 (Click to sort)', align: 'end', width:'12%', key: '24month' },
-  { title: '36개월 (Click to sort)', align: 'end', width:'12%', key: '36month' },
+  { title: '상품명', align: 'center', sortable: false, width: '32%', key: 'name' },
+  { title: '6개월 (Click to sort)', align: 'end', width: '12%', key: '6month' },
+  { title: '12개월 (Click to sort)', align: 'end', width: '12%', key: '12month' },
+  { title: '24개월 (Click to sort)', align: 'end', width: '12%', key: '24month' },
+  { title: '36개월 (Click to sort)', align: 'end', width: '12%', key: '36month' },
 ]
 
 const deposits = ref([])
@@ -199,12 +199,8 @@ const deleteDepositUser = function () {
         </table>
         <hr class="my-3">
         <div class="mx-auto">
-          <BarChartDetail
-            :title="selectedDepositSimple.name"
-            :average-intr-rate="averageIntrRate"
-            :intr-rate="intrRate"
-            :intr-rate2="intrRate2"
-          />
+          <BarChartDetail :title="selectedDepositSimple.name" :average-intr-rate="averageIntrRate" :intr-rate="intrRate"
+            :intr-rate2="intrRate2" />
           <p class="text-caption">* 개월별 평균 예금 금리는 2023년 11월 기준입니다.</p>
           <p class="text-caption">* 차트에 없는 이자율은 상품에 존재하지 않는 옵션입니다.</p>
         </div>
@@ -218,7 +214,8 @@ const deleteDepositUser = function () {
     <table v-if="depositLength !== 0" class="table">
       <thead>
         <tr>
-          <th v-for="header in headers" :key="header.key" :align="header.align" :width="header.width">{{ header.title }}</th>
+          <th v-for="header in headers" :key="header.key" :align="header.align" :width="header.width">{{ header.title }}
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -233,7 +230,7 @@ const deleteDepositUser = function () {
         </tr>
       </tbody>
     </table>
-    
+
     <div v-else class="loading">
       <div class="progress-circular"></div>
     </div>
@@ -241,7 +238,7 @@ const deleteDepositUser = function () {
 </template>
 
 <style scoped>
-.loading { 
+.loading {
   display: flex;
   height: 80vh;
   align-items: center;
@@ -258,8 +255,13 @@ const deleteDepositUser = function () {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .dialog {
@@ -288,12 +290,12 @@ const deleteDepositUser = function () {
   margin-top: 20px;
 }
 
-tbody > tr {
+tbody>tr {
   transition: 200ms;
   cursor: pointer;
 }
 
-tbody > tr:hover {
+tbody>tr:hover {
   background-color: rgb(247, 250, 253);
   color: #1089FF;
 }
@@ -304,7 +306,8 @@ tbody > tr:hover {
   margin-top: 20px;
 }
 
-.table th, .table td {
+.table th,
+.table td {
   border: 1px solid #ddd;
   padding: 8px;
 }
@@ -318,5 +321,4 @@ tbody > tr:hover {
   padding: 10px;
   border: 1px solid #1089FF;
   border-radius: 4px;
-}
-</style>
+}</style>

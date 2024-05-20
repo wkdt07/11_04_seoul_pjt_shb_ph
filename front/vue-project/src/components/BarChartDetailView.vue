@@ -1,4 +1,3 @@
-
 <script setup>
 import { ref, watch, defineProps, nextTick, onMounted } from 'vue'
 import { Bar } from 'vue-chartjs'

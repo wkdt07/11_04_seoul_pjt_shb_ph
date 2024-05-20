@@ -60,11 +60,25 @@ const router = createRouter({
       path:'/profile/:username',
       name:'ProfileView',
       component:ProfileView
+    },
+    {
+      path:'/profile/:username',
+      name:'ProfileView',
+      component:ProfileView
+    },
+    {
+      path:'/exchange',
+      name:'ExchangeView',
+      component:ExchangeView
+    },
+    {
+      path:'/productDetail/:fin_prdt_cd',
+      name:'ProductDetailView',
+      component:ProductDetailView
     }
 
 ]
 })
-
 router.beforeEach((to,from)=>{
   const store=useCounterStore()
   if(to.name==='ArticleView'&& !store.isLogin){

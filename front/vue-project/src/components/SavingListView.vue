@@ -38,10 +38,10 @@ const router = useRouter()
 
 const makeItems = function (item) {
   const result = {
-    'deposit_code': item['deposit_code'],
+    'deposit_code': item['fin_prdt_cd'],
     'dcls_month': item['dcls_month'],
     'kor_co_nm': item['kor_co_nm'],
-    'name': item['name'],
+    'name': item['fin_prdt_nm'],
     '6month': null,
     '12month': null,
     '24month': null,
@@ -115,7 +115,7 @@ const getDeposit = function () {
         '가입자 수 (MYFI 기준)': data.contract_user.length,
         '공시 제출월': data['dcls_month'],
         '금융 회사명': data['kor_co_nm'],
-        '금융 상품명': data['name'],
+        '금융 상품명': data['fin_prdt_nm'],
         '가입 방법': data['join_way'],
         '만기 후 이자율': data['mtrt_int'],
         '우대 조건': data['spcl_cnd'],
@@ -124,7 +124,7 @@ const getDeposit = function () {
         '최고 한도': data['max_limit'],
         '기타 유의사항': data['etc_note']
       }
-      const optionList = data.depositoption_set
+      const optionList = data.options
 
       for (const option of optionList) {
         const idx = parseInt(option.save_trm) / 6 - 1

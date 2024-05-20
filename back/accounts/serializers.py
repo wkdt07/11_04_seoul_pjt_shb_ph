@@ -193,3 +193,19 @@ class CustomRegisterSerializer(RegisterSerializer):
         adapter.save_user(request, user, self)
         self.custom_signup(request, user)
         return user
+    
+    
+class UserInfoSerializer(serializers.ModelSerializer):
+    profile_img = serializers.ImageField(use_url=True)
+    contract_deposit = ContractDepositSerializer(many=True, read_only=True)
+    contract_saving = ContractSavingSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            'id', 'username', 'name', 'email', 'profile_img', 'financial_products', 
+            'age', 'now_money', 'money_per_year', 'desire_amount_saving', 
+            'desire_amount_deposit', 'deposit_period', 'saving_period', 
+            'fav_place', 'is_superuser', 'contract_deposit', 'contract_saving'
+        ]
+        read_only_fields = ['id', 'username', 'is_superuser']

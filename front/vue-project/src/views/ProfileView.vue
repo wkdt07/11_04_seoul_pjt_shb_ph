@@ -169,13 +169,15 @@ const fetchUserInfo = async () => {
     const username = route.params.username;
     await store.getUserInfo(username);
     user.value = store.userInfo;
-
+    console.log('fetchUserInfo 결괴',user.value)
     if (user.value) {
       await store.getUserArticles(user.value.id);
       userArticles.value = store.userArticles || [];
+      console.log('vue에서 userArticles:',userArticles.value)
 
       await store.getUserComments(user.value.id);
       userComments.value = store.userComments || [];
+      console.log('vue에서 userComments:',userComments.value)
     }
   } catch (err) {
     error.value = '사용자 정보를 가져오지 못했습니다.';
@@ -185,6 +187,7 @@ const fetchUserInfo = async () => {
 };
 
 const getArticleTitle = (articlePk) => {
+  console.log(articleTitles.value)
   return articleTitles.value[articlePk] || '알 수 없는 글';
 };
 

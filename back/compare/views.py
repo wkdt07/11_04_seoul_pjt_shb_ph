@@ -19,7 +19,6 @@ def make_financial_data(request):
     SAVING_API_URL = f'http://finlife.fss.or.kr/finlifeapi/savingProductsSearch.json?auth={BANK_API_KEY}&topFinGrpNo=020000&pageNo=1'
 
     deposit_res = requests.get(DEPOSIT_API_URL).json()
-    print(request)
     deposit_baseList = deposit_res.get('result').get('baseList')
     deposit_optionList = deposit_res.get('result').get('optionList')
 

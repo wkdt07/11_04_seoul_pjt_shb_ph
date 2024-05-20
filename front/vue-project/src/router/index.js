@@ -81,6 +81,9 @@ router.beforeEach((to,from)=>{
     window.alert('이미 로그인이 되어있습니다')
     return {name:'ArticleView'}
   }
-
+  if ((to.name ==='LogOutView')&& !store.isLogin){
+    window.alert('아직 로그인하지 않았습니다.')
+    return {name:'LogInView'}
+  }
 })
 export default router

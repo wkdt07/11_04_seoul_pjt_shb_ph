@@ -389,7 +389,7 @@ export const useCounterStore = defineStore('counter', () => {
   watch(userInfo, () => { //특정 값을 찾기 위한 username
     userContractDeposits.value = userInfo.value?.contract_deposit || [];
     userContractSavings.value = userInfo.value?.contract_saving || [];
-  });
+  });  
 
   const getUserInfo = async (username) => {
     if(!username) return;
@@ -421,7 +421,7 @@ export const useCounterStore = defineStore('counter', () => {
       console.log(err);
     }
   };
-
+  // 사용자 정보를 가져오는 함수
   const getArticles = async () => {
     try {
       const response = await axios.get(`${DJANGO_URL}/articles/`, {
@@ -449,6 +449,9 @@ export const useCounterStore = defineStore('counter', () => {
     }
   };
 
+  const isLogin = computed(() => {
+    return token.value !== null;
+  });
 
   const logIn = async (payload) => {
     const { username, password } = payload;
@@ -512,10 +515,16 @@ export const useCounterStore = defineStore('counter', () => {
     }
   };
 
-  const logOut = () => {
-    token.value = null;
-    userInfo.value = null;
-    router.push({ name: 'LogInView' });
+  const logOut = async () => {
+
+    try {
+      await axios.post(`${DJANGO_URL}/accounts/logout/`);
+      token.value = null;
+      userInfo.value = null;
+      router.push({ name: 'home' });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const createComment = async (payload) => {
@@ -566,10 +575,7 @@ export const useCounterStore = defineStore('counter', () => {
     }
   };
 
-  return {
-    getUserArticles,
-    getUserComments,
-    DJANGO_URL, 
+  return { 
     articles, 
     getArticles, 
     getArticle,

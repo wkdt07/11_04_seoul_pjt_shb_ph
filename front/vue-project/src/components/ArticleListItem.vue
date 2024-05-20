@@ -9,20 +9,12 @@
       [DETAIL]
     </RouterLink>
     {{ article }}
-    <!-- 조회용
-      <CommentList
-      :article_pk="article.id"
-      /> -->
-      <!-- <RouterLink :to="{name:'createComment',params: { article_pk: article.id }}"></RouterLink>
-   -->
     </div>
   </template>
   
   <script setup>
   import { RouterLink } from 'vue-router'
-  // import CommentList from './CommentList.vue';
-  // import { RouterLink } from 'vue-router';
-  
+
   defineProps({
     article: Object
   })

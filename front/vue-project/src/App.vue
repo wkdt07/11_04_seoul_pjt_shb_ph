@@ -43,21 +43,6 @@
 
 </template>
 
-<!-- <script setup>
-import { RouterView, RouterLink } from 'vue-router'
-import { useCounterStore } from './stores/counter';
-import { useRouter } from 'vue-router';
-import Map from '@/components/Map.vue'
-// import Map from './components/Map.vue';
-
-const store = useCounterStore()
-const router = useRouter()
-const logOut=function(){
-  store.logOut()
-  router.push({name:'LogInView'})
-}
-</script> -->
-
 <style scoped>
 
 </style>

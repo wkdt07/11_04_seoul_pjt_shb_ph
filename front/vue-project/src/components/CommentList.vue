@@ -1,35 +1,3 @@
-<!-- <template>
-  <div v-if="store.comments.length">
-  <div v-for="comment in store.comments">    
-    <p>{{ comment.content }}</p>
-    <p>{{ comment.user }}</p>   
-  </div></div>
-  <RouterLink :to="{name:'createComment',params: { article_pk: article.id }}"></RouterLink>
-</template> 
-
-<script setup>
-import { useCounterStore } from '@/stores/counter'
-import { RouterLink } from 'vue-router';
-
-const store = useCounterStore()
-
-defineProps({
-  article : Object
-})
-
-const article_pk = article.id
-
-
-const getComments = function(){
-  store.getComments(article_pk)
-}
-</script>
-
-<style scoped>
-
-</style> -->
-
-
 <template>
   <div v-if="comments.length">
     <div v-for="comment in comments" :key="comment.id">

@@ -9,7 +9,6 @@ class Deposit(models.Model):
     fin_prdt_cd = models.CharField(max_length=100)
     fin_prdt_nm = models.CharField(max_length=100)
     join_way = models.CharField(max_length=100)
-    # mtrt_int = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     mtrt_int = models.TextField(blank=True, null=True)
     spcl_cnd = models.TextField(blank=True, null=True)
     join_deny = models.IntegerField(blank=True, null=True)

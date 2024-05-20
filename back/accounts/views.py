@@ -47,6 +47,5 @@ def get_user_comments(request, user_pk):
         return Response({"message": "No comments found for this user."}, status=200)
 
 
-    # comments = Comment.objects.filter(user=user)
     serializer = CommentSerializer(comments, many=True)
     return Response(serializer.data)

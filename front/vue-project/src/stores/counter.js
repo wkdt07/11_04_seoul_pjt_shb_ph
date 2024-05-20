@@ -449,9 +449,6 @@ export const useCounterStore = defineStore('counter', () => {
     }
   };
 
-  const isLogin = computed(() => {
-    return token.value !== null;
-  });
 
   const logIn = async (payload) => {
     const { username, password } = payload;

@@ -23,7 +23,7 @@ class DepositOptions(models.Model):
     deposit = models.ForeignKey(Deposit, related_name='options', on_delete=models.CASCADE)
     intr_rate_type = models.CharField(max_length=1)
     intr_rate_type_nm = models.CharField(max_length=2)
-    sava_trm = models.CharField(max_length=3)
+    save_trm = models.CharField(max_length=3)
     intr_rate = models.FloatField(null=True)
     intr_rate2 = models.FloatField(null=True)
 
@@ -50,6 +50,6 @@ class SavingOptions(models.Model):
     intr_rate_type_nm = models.CharField(max_length=2)
     rsrv_type = models.CharField(max_length=1)
     rsrv_type_nm = models.CharField(max_length=5) 
-    sava_trm = models.CharField(max_length=3)
+    save_trm = models.CharField(max_length=3)
     intr_rate = models.FloatField(null=True)
     intr_rate2 = models.FloatField(null=True)

@@ -591,5 +591,8 @@ export const useCounterStore = defineStore('counter', () => {
     getUserInfo,
     userArticles,
     userComments,
+    getUserArticles,
+    getUserComments,
+    DJANGO_URL
   };
 }, { persist: true });

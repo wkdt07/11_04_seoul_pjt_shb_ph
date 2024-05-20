@@ -1,8 +1,22 @@
+# from django.db import models
+
+
+# class Exchange (models.Model):
+#     cur_unit = models.CharField(max_length=100,primary_key=True)
+#     cur_nm = models.CharField(max_length=100)
+#     ttb = models.CharField(max_length=100)
+#     tts = models.CharField(max_length=100)
+#     deal_bas_r = models.CharField(max_length=100)
+#     bkpr = models.CharField(max_length=100)
+#     yy_efee_r = models.CharField(max_length=100)
+#     ten_dd_efee_r = models.CharField(max_length=100)
+#     kftc_deal_bas_r = models.CharField(max_length=100)
+#     kftc_bkpr = models.CharField(max_length=100)
+
 from django.db import models
 
-
-class Exchange (models.Model):
-    cur_unit = models.CharField(max_length=100,primary_key=True)
+class Exchange(models.Model):
+    cur_unit = models.CharField(max_length=100, primary_key=True)
     cur_nm = models.CharField(max_length=100)
     ttb = models.CharField(max_length=100)
     tts = models.CharField(max_length=100)
@@ -12,3 +26,6 @@ class Exchange (models.Model):
     ten_dd_efee_r = models.CharField(max_length=100)
     kftc_deal_bas_r = models.CharField(max_length=100)
     kftc_bkpr = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f'{self.cur_nm} ({self.cur_unit})'

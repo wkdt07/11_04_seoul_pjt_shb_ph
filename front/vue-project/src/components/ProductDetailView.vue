@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import BarChart from '@/components/BarChartView.vue'
-import BarChartDetail from '@/components/BarChartDetailView.vue'
+import BarChart from '@/components/BarChart.vue'
+import BarChartDetail from '@/components/BarChartDetail.vue'
 import axios from 'axios'
 import { useCounterStore } from '../stores/counter'
 
@@ -122,11 +122,11 @@ const getProducts = function () {
       code: deposit.deposit_code,
       type: '정기예금',
       bankName: deposit.kor_co_nm,
-      name: deposit.fin_prdt_nm,
+      name: deposit.name,
       options: []
     }
 
-    for (const option of deposit.options) {
+    for (const option of deposit.depositoption_set) {
       const optionTemp = {
         'intrRate': option.intr_rate,
         'intrRate2': option.intr_rate2,

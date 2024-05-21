@@ -1,9 +1,13 @@
 <template>
   <div v-if="comments.length">
+    <hr>
     <div v-for="comment in comments" :key="comment.id">
       <br>
-      <p>작성자: {{ comment.user }}, {{ comment.id }}번째 댓글: {{ comment.content }}</p>
-      {{ comment }}
+      <p>{{ comment.content }} by {{ comment.user }}</p>
+      <button @click="editComment(comment.id)" v-if="store.userInfo.id===comment.user">수정하기</button>
+      <button @click="deleteComment(comment.id)" v-if="store.userInfo.id===comment.user">삭제하기</button>
+      <hr>
+      <!-- {{ comment }} -->
       
     </div>
   </div>
@@ -25,7 +29,20 @@ const getComments = async () => {
   comments.value = store.comments;
 };
 
+const editComment = async (commentId) => {
+  const newContent = prompt('댓글을 수정하세요:');
+  if (newContent) {
+    await store.editComment(commentId, newContent);
+    await getComments(); // 댓글 목록 갱신
+  }
+};
 
+const deleteComment = async (commentId) => {
+  if (confirm('댓글을 삭제하시겠습니까?')) {
+    await store.deleteComment(commentId);
+    await getComments(); // 댓글 목록 갱신
+  }
+};
 
 onMounted(getComments);
 

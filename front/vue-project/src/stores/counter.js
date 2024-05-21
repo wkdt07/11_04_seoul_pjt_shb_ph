@@ -86,11 +86,12 @@ export const useCounterStore = defineStore('counter', () => {
   };
 
 
-  const logIn = async (payload) => {
+  const login = async (payload) => {
     const { username, password } = payload;
     console.log(payload)
     try {
       const res = await axios.post(`${DJANGO_URL}/accounts/login/`, { username, password });
+      alert(`로그인 되었습니다. ${username}님 환영합니다!`)
       console.log('로그인이 완료되었습니다.');
       token.value = res.data.key;
       console.log(username)
@@ -108,52 +109,83 @@ export const useCounterStore = defineStore('counter', () => {
       userContractSavings.value = userInfo.value.contract_saving || [];
       // console.log('userInfoResponse=',userInfoResponse)
       console.log('userInfo=',userInfo)
-      router.push({ name: 'ArticleView' });
+      router.push({ name: 'home' });
     } catch (err) {
       alert('잘못된 아이디, 혹은 패스워드입니다.\n다시 시도해주세요.');
       console.log(err);
     }
   };
 
-  const signUp = async (payload) => {
-    const {
-      username,
-      password1,
-      password2,
-      email,
-      name,
-      age,
-      now_money,
-      money_per_year,
-      fav_place
-    } = payload;
+  // const signUp = async (formData) => {
+  //   const {
+  //     username,
+  //     password1,
+  //     password2,
+  //     email,
+  //     name,
+  //     age,
+  //     now_money,
+  //     money_per_year,
+  //     fav_place,
+  //     nickname
+  //   } = payload;
+  //   try {
+  //     await axios.post(`${DJANGO_URL}/accounts/registration/`, {
+  //       username,
+  //       password1,
+  //       password2,
+  //       email,
+  //       name,
+  //       age: parseInt(age, 10),  // 문자열을 숫자로 변환
+  //       now_money: parseInt(now_money, 10),  // 문자열을 숫자로 변환
+  //       money_per_year: parseInt(money_per_year, 10),  // 문자열을 숫자로 변환
+  //       fav_place,
+  //       nickname
+  //     });
+  //     alert(`${username}님, 성공적으로 회원가입이 완료되었습니다!`)
+  //     console.log('회원가입이 완료되었습니다.');
+  //     const password = password1;
+  //     await login({ username, password });
+  //   } catch (err) {
+  //     if (err.response && err.response.data) {
+  //       console.log('서버 에러 메시지:', err.response.data);
+  //       alert(`회원가입 실패: ${JSON.stringify(err.response.data)}`);
+  //     } else {
+  //       console.log('회원가입 요청 실패:', err);
+  //       alert('회원가입 요청에 실패했습니다. 다시 시도해 주세요.');
+  //     }
+  //   }
+  // };
+
+  const signUp = async (formData) => {
     try {
-      await axios.post(`${DJANGO_URL}/accounts/registration/`, {
-        username,
-        password1,
-        password2,
-        email,
-        name,
-        age,
-        now_money,
-        money_per_year,
-        fav_place
+      const response = await axios.post(`${DJANGO_URL}/accounts/registration/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
+      alert(`${formData.get('username')}님, 성공적으로 회원가입이 완료되었습니다!`);
       console.log('회원가입이 완료되었습니다.');
-      const password = password1;
-      await logIn({ username, password });
+      const username = formData.get('username');
+      const password = formData.get('password1');
+      await login({ username, password });
     } catch (err) {
-      alert('잘못된 아이디, 혹은 패스워드입니다.\n다시 시도해주세요.');
-      console.log(err);
+      if (err.response && err.response.data) {
+        console.log('서버 에러 메시지:', err.response.data);
+        alert(`회원가입 실패: ${JSON.stringify(err.response.data)}`);
+      } else {
+        console.log('회원가입 요청 실패:', err);
+        alert('회원가입 요청에 실패했습니다. 다시 시도해 주세요.');
+      }
     }
   };
-
   const logOut = async () => {
 
     try {
       await axios.post(`${DJANGO_URL}/accounts/logout/`);
       token.value = null;
       userInfo.value = null;
+      alert('로그아웃 되었습니다.')
       router.push({ name: 'home' });
     } catch (err) {
       console.log(err);
@@ -208,19 +240,84 @@ export const useCounterStore = defineStore('counter', () => {
     }
   };
 
+  const editComment = async (commentId, content) => {
+    try {
+      await axios.put(`${DJANGO_URL}/articles/comments/${commentId}/`, { content }, {
+        headers: {
+          Authorization: `Token ${token.value}`
+        }
+      });
+      console.log('댓글 수정 완료');
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+
+  const deleteComment = async (commentId) => {
+    try {
+      await axios.delete(`${DJANGO_URL}/articles/comments/${commentId}/`, {
+        headers: {
+          Authorization: `Token ${token.value}`
+        }
+      });
+      console.log('댓글 삭제 완료');
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  
+  // const updateProfile = async (formData) => {
+  //   if (!isLogin.value || !userInfo.value) {
+  //     console.log('로그인되지 않음 또는 사용자 정보 없음');
+  //     return;
+  //   }
+  
+  //   try {
+  //     const response = await axios.put(`${DJANGO_URL}/users/profile/`, formData, {
+  //       headers: {
+  //         Authorization: `Token ${token.value}`,
+  //         'Content-Type': 'multipart/form-data'
+  //       }
+  //     });
+  //     userInfo.value = response.data;
+  //     console.log('프로필 업데이트 성공:', response.data);
+  //   } catch (err) {
+  //     console.log('프로필 업데이트 실패:', err);
+  //   }
+  // };
+
+  const updateProfile = async (formData) => {
+    try {
+      const response = await axios.put(`${DJANGO_URL}/users/profile/`, formData, {
+        headers: {
+          Authorization: `Token ${token.value}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      userInfo.value = response.data;
+      console.log('프로필 업데이트 성공:', response.data);
+    } catch (err) {
+      console.log('프로필 업데이트 실패:', err);
+      if (err.response && err.response.data) {
+        console.log('서버 응답 데이터:', err.response.data);
+      }
+    }
+  };
+
+  // 제발!!!!!!!!!!!!!!!리턴해!!!!!!!!!!!!!!!!!!!!!!!!!!!
   return { 
     articles, 
     getArticles, 
     getArticle,
     signUp, 
-    logIn, 
+    login, 
     token, 
     isLogin, 
     logOut, 
     comments,
     getComments, 
     createComment,
-    // 추가된 부분
     userInfo,
     userContractDeposits,
     userContractSavings,
@@ -229,6 +326,9 @@ export const useCounterStore = defineStore('counter', () => {
     userComments,
     getUserArticles,
     getUserComments,
-    DJANGO_URL
+    DJANGO_URL,
+    deleteComment,
+    editComment,
+    updateProfile
   };
 }, { persist: true });

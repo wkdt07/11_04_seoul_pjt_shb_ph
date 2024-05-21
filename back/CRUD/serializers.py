@@ -9,10 +9,11 @@ class ArticleListSerializer(serializers.ModelSerializer):
         
 
 class ArticleSerializer(serializers.ModelSerializer):
+    image = serializers.ImageField(required=False)
     class Meta:
         model=Article
         fields='__all__'
-        read_only_fields = ('user',)
+        read_only_fields = ('user', 'created_at', 'updated_at')
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:

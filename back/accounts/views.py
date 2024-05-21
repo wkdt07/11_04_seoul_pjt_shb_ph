@@ -1,8 +1,9 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics
 from rest_framework.response import Response
 from django.contrib.auth import get_user_model
-from .serializers import UserInfoSerializer
+from .serializers import UserInfoSerializer,UserUpdateSerializer
 from CRUD.models import Article,Comment
 from CRUD.serializers import ArticleSerializer,CommentSerializer
 
@@ -49,3 +50,15 @@ def get_user_comments(request, user_pk):
 
     serializer = CommentSerializer(comments, many=True)
     return Response(serializer.data)
+
+
+
+
+class  UserProfileUpdateView(generics.RetrieveUpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserUpdateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        # 현재 요청을 보낸 사용자의 객체를 반환
+        return self.request.user

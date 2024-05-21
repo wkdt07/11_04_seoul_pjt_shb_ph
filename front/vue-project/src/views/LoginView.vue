@@ -1,6 +1,6 @@
 <template>
   <div>
-    <form @submit.prevent="logIn">
+    <form @submit.prevent="login">
       <label for="username">username : </label>
       <input
         type="text"
@@ -10,7 +10,7 @@
       <label for="password">password : </label>
       <input type="password" id="password" v-model.trim="password" /><br />
 
-      <input type="submit" value="logIn" />
+      <input type="submit" value="login" />
     </form>
   </div>
 </template>
@@ -22,12 +22,12 @@ const store = useCounterStore();
 const username = ref(null);
 const password = ref(null);
 
-const logIn = function () {
+const login = function () {
   const payload = {
     username: username.value,
     password: password.value,
   };
-  store.logIn(payload);
+  store.login(payload);
 };
 </script>
 

@@ -1,24 +1,27 @@
 <template>
   <div>
     <h1 v-if="user">{{ user.username }} 프로필 페이지</h1>
+    <img :src="getProfileImgUrl(user.profile_img)" alt="Profile Image" v-if="user && user.profile_img">
     <p v-if="user">이름: {{ user.name }}</p>
     <p v-if="user">이메일: {{ user.email }}</p>
+    <p v-if="user">닉네임: {{ user.nickname }}</p>
     <p v-if="user">나이: {{ user.age }}</p>
     <p v-if="user">현재 자산: {{ user.now_money }}</p>
     <p v-if="user">연봉: {{ user.money_per_year }}</p>
     <p v-if="user">선호 장소: {{ user.fav_place }}</p>
-    <img :src="user.profile_img" alt="Profile Image" v-if="user && user.profile_img">
+    
+    <div><button v-if="isCurrentUser" @click="editProfile">프로필 수정</button></div>
 
     <h2 v-if="user && user.contract_deposit">계약된 예금</h2>
     <ul v-if="user && user.contract_deposit">
       <li v-for="deposit in user.contract_deposit" :key="deposit.id">{{ deposit.name }}</li>
     </ul>
-
+    
     <h2 v-if="user && user.contract_saving">계약된 적금</h2>
     <ul v-if="user && user.contract_saving">
       <li v-for="saving in user.contract_saving" :key="saving.id">{{ saving.name }}</li>
     </ul>
-
+    
     <h2 v-if="userArticles">작성한 글</h2>
     <ul v-if="userArticles && userArticles.length">
       <li v-for="article in userArticles" :key="article.id">
@@ -27,7 +30,7 @@
         <br>
       </li>
     </ul>
-
+    
     <h2 v-if="userComments">작성한 댓글</h2>
     <ul v-if="userComments.length">
       <li v-for="comment in userComments" :key="comment.id">
@@ -45,11 +48,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, watchEffect } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, onMounted,computed, watch, watchEffect } from 'vue';
+import { useRoute,useRouter } from 'vue-router';
 import { useCounterStore } from '@/stores/counter';
 import { RouterLink } from 'vue-router';
 
+const router = useRouter()
 const route = useRoute();
 const store = useCounterStore();
 const user = ref(null);
@@ -59,6 +63,13 @@ const articleTitles = ref({});
 const error = ref(null);
 const loading = ref(false);
 
+const getProfileImgUrl = (imgPath) => {
+  console.log(`이미지URL:${imgPath}`)
+  console.log(`결과값:${store.DJANGO_URL}${imgPath}}`)
+  return `${store.DJANGO_URL}${imgPath}`;
+  
+};
+
 const fetchUserInfo = async () => {
   loading.value = true;
   error.value = null;
@@ -66,7 +77,7 @@ const fetchUserInfo = async () => {
     const username = route.params.username;
     await store.getUserInfo(username);
     user.value = store.userInfo;
-    console.log('fetchUserInfo 결괴',user.value)
+    console.log('fetchUserInfo 결과',user.value)
     if (user.value) {
       await store.getUserArticles(user.value.id);
       userArticles.value = store.userArticles || [];
@@ -95,6 +106,14 @@ const fetchArticleTitles = async () => {
       articleTitles.value[comment.article] = article.title || '알 수 없는 글';
     }
   }
+};
+
+const isCurrentUser = computed(() => {
+  return store.userInfo && store.userInfo.username === route.params.username;
+});
+
+const editProfile = () => {
+  router.push({ name: 'ProfileEditView', params: { username: route.params.username } });
 };
 
 onMounted(fetchUserInfo);

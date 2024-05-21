@@ -9,23 +9,26 @@
   const router = useRouter()
   const logOut=function(){
     store.logOut()
-    router.push({name:'LogInView'})
+    router.push({name:'home'})
   }
 
   console.log(store.userInfo)
   
-  // if (store.isLogin) {
-  //   store.getUserInfo(); 
-  // }
+  // // if (store.isLogin) {
+  // //   store.getUserInfo(); 
+  // // }
   
+  import MainPage from './components/MainPage.vue';
   </script>
   
 <template>
+  <!-- <MainPage/> -->
   <header>
     <nav>
+      <RouterLink :to="{name:'home'}">MainPage</RouterLink><hr>
       <RouterLink :to="{ name: 'ArticleView'}">Articles</RouterLink><hr>
       <RouterLink :to="{ name: 'SignUpView'}">SignUpPage</RouterLink><hr>
-      <RouterLink :to="{ name: 'LogInView'}">LogInPage</RouterLink><hr>
+      <RouterLink :to="{ name: 'LoginView'}">LoginPage</RouterLink><hr>
       <RouterLink :to="{name:'MapView'}">Map</RouterLink><hr>
       <RouterLink :to="{name:'DepositListView'}">금리비교</RouterLink><hr>
       <RouterLink :to="{name:'ExchangeView'}">환율계산기</RouterLink><hr>
@@ -37,10 +40,10 @@
       
     </nav>
   </header>
-  <!-- <Map/> -->
+
   <RouterView />
   <!-- v-if="store.isLogin && store.userInfo"  -->
-
+  <!-- <RouterView/> -->
 </template>
 
 <style scoped>

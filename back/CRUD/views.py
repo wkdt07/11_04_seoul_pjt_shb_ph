@@ -43,11 +43,17 @@ def article_detail(request, article_pk):
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
     
     elif request.method == 'DELETE':
         if request.user == article.user:
+            # img = article.image
             article.delete()
+            # 사진은 지워지지 않는다. -> 안 지워도 된다.
             return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
 @api_view(['POST', 'GET', 'DELETE', 'PUT'])
 @permission_classes([IsAuthenticated])
@@ -69,27 +75,42 @@ def comment_manage(request, article_pk=None, comment_pk=None):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    elif request.method == 'PUT' and comment_pk is not None:
-        try:
-            comment = Comment.objects.get(pk=comment_pk, user=request.user)
-        except Comment.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    # elif request.method == 'PUT' and comment_pk is not None:
+    #     try:
+    #         comment = Comment.objects.get(pk=comment_pk, user=request.user)
+    #     except Comment.DoesNotExist:
+    #         return Response(status=status.HTTP_404_NOT_FOUND)
         
-        serializer = CommentSerializer(comment, data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     serializer = CommentSerializer(comment, data=request.data)
+    #     if serializer.is_valid(raise_exception=True):
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'PUT' and comment_pk is not None:
+        comment = get_object_or_404(Comment, pk=comment_pk)
+        if request.user == comment.user:
+            serializer = CommentSerializer(comment, data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
+        return Response(status=status.HTTP_403_FORBIDDEN)
+
+    # elif request.method == 'DELETE' and comment_pk is not None:
+    #     try:
+    #         comment = Comment.objects.get(pk=comment_pk, user=request.user)
+    #     except Comment.DoesNotExist:
+    #         return Response(status=status.HTTP_404_NOT_FOUND)
+        
+    #     if request.user == comment.user:
+    #         comment.delete()
+    #         return Response(status=status.HTTP_204_NO_CONTENT)
+    #     return Response(status=status.HTTP_403_FORBIDDEN)
+
+    # return Response(status=status.HTTP_400_BAD_REQUEST)
     
     elif request.method == 'DELETE' and comment_pk is not None:
-        try:
-            comment = Comment.objects.get(pk=comment_pk, user=request.user)
-        except Comment.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        
+        comment = get_object_or_404(Comment, pk=comment_pk)
         if request.user == comment.user:
             comment.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_403_FORBIDDEN)
-
-    return Response(status=status.HTTP_400_BAD_REQUEST)

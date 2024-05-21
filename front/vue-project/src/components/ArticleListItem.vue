@@ -1,14 +1,12 @@
 <template>
-    <div>
-      <h5>{{ article.id }}</h5>
-      <p>{{ article.title }}</p>
-      <p>{{ article.content }}</p>
-      <RouterLink 
-        :to="{ name: 'DetailView', params: { id: article.id }}"
-      >
-      [DETAIL]
+  <div>
+    <!-- <span>{{ article.id }}</span> -->
+    <RouterLink 
+      :to="{ name: 'DetailView', params: { id: article.id }}"
+      >    <p>{{ article.title }}</p>
     </RouterLink>
-    {{ article }}
+   
+    <!-- {{ article }} -->
     </div>
   </template>
   

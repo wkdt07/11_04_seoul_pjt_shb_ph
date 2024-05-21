@@ -1,13 +1,14 @@
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from allauth.account.adapter import DefaultAccountAdapter
 from compare.models import Deposit,Saving
+
 class User(AbstractUser):
     username = models.CharField(max_length=50, unique=True)
+    nickname = models.CharField(max_length = 50)
     name = models.CharField(max_length=50)
-    email = models.EmailField(max_length=300, blank=True, null=True)
-    profile_img = models.ImageField(upload_to='image/', default='image/user.png')
+    email = models.EmailField(max_length=300)
+    profile_img = models.ImageField(upload_to='users/', default='images/user.png')
     financial_products = models.TextField(blank=True, null=True)
     age = models.IntegerField(blank=True, null=True)
     now_money = models.IntegerField(blank=True, null=True)  # 현재 자산
@@ -22,6 +23,7 @@ class User(AbstractUser):
     savings = models.ManyToManyField(Saving,related_name='user',blank=True)
 
     USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['name','email']
 
 class CustomAccountAdapter(DefaultAccountAdapter):
     def save_user(self, request, user, form, commit=True):
@@ -29,6 +31,7 @@ class CustomAccountAdapter(DefaultAccountAdapter):
 
         data = form.cleaned_data
         username = data.get("username")
+        nickname = data.get('nickname')
         name = data.get("name")
         first_name = data.get("first_name")
         last_name = data.get("last_name")
@@ -53,6 +56,8 @@ class CustomAccountAdapter(DefaultAccountAdapter):
             user_field(user, "name", name)
         if profile_img:
             user.profile_img = profile_img
+        if nickname:
+            user.nickname = nickname
         if age is not None:
             user.age = age
         if now_money is not None:

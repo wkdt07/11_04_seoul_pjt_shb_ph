@@ -14,6 +14,9 @@ import ExchangeView from '@/views/Exchangeview.vue'
 import MainPage from '@/components/MainPage.vue'
 import EditView from '@/views/EditView.vue'
 import ProfileEditView from '@/views/ProfileEditView.vue'
+import SavingListView from '@/components/SavingListView.vue'
+import CompareView from '@/views/CompareView.vue'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -56,6 +59,18 @@ const router = createRouter({
       path:'/depositList',
       name:'DepositListView',
       component:DepositListView
+    }
+    ,
+    {
+      path:'/savingList',
+      name:'SavingListView',
+      component:SavingListView
+    }
+    ,
+    {
+      path:'/compairView',
+      name:'CompareView',
+      component:CompareView
     }
     ,
     {

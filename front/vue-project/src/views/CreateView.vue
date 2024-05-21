@@ -7,7 +7,7 @@
         <input type="text" v-model.trim="title" id="title">
       </div>
       <div>
-        <label for="content">내용 : </label>
+        <label for="content">내용 :akzj </label>
         <textarea v-model.trim="content" id="content"></textarea>
       </div>
       <div>

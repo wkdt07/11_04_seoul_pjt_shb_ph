@@ -261,6 +261,7 @@ onMounted(async () => {
   <div>
     <header class="d-flex justify-space-between">
       <h1><span class="color">정기예금</span> 검색하기</h1>
+
       <div class="w-25">
         <select v-model="selectedBank" @change="clickBank" class="ml-auto bank-select">
           <option v-for="bank in banks" :key="bank">{{ bank }}</option>

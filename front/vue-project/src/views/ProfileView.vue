@@ -1,5 +1,9 @@
 <template>
   <div>
+
+    <!-- {{ user }} -->
+
+    {{ store.userInfo }}
     <h1 v-if="user">{{ user.username }} 프로필 페이지</h1>
     <img :src="getProfileImgUrl(user.profile_img)" alt="Profile Image" v-if="user && user.profile_img">
     <p v-if="user">이름: {{ user.name }}</p>

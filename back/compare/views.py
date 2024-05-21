@@ -170,18 +170,44 @@ def saving_list(request):
     return Response(serializer.data)
 
 
+# @api_view(['GET'])
+# def saving_detail(request, saving_code):
+#     try:
+#         saving = get_object_or_404(Saving, fin_prdt_cd=saving_code)
+#         serializer = SavingSerializer(saving)
+#         users_count = saving.users.count() 
+#         data = serializer.data
+#         data['user_count'] = users_count
+#         return Response(data)
+#     except Exception as e:
+#         return Response({"error": str(e)}, status=500)
+
+# @api_view(['GET'])
+# def saving_detail(request, saving_code):
+#     try:
+#         print(f"Fetching saving details for code: {saving_code}")  # 추가 로그
+#         saving = get_object_or_404(Saving, fin_prdt_cd=saving_code)
+#         print(f"Found saving: {saving}")  # 추가 로그
+#         serializer = SavingSerializer(saving)
+#         users_count = saving.contract_users.count()
+#         print(f"Users count: {users_count}")  # 추가 로그
+#         data = serializer.data
+#         data['user_count'] = users_count
+#         return Response(data)
+#     except Exception as e:
+#         print(f"Error in saving_detail view: {e}")  # 추가 로그
+#         return Response({"error": str(e)}, status=500)
+
 @api_view(['GET'])
-def saving_detail(request, fin_prdt_cd):
+def saving_detail(request, saving_code):
     try:
-        saving = get_object_or_404(Saving, fin_prdt_cd=fin_prdt_cd)
+        saving = get_object_or_404(Saving, fin_prdt_cd=saving_code)
         serializer = SavingSerializer(saving)
-        users_count = saving.users.count() 
-        data = serializer.data
-        data['user_count'] = users_count
+        data = serializer.data  # serializer가 user_count를 포함하도록 함
         return Response(data)
     except Exception as e:
+        print(f"Error in saving_detail view: {e}")  # 디버깅을 위해 추가된 로그
         return Response({"error": str(e)}, status=500)
-
 
     
 @api_view(['GET'])

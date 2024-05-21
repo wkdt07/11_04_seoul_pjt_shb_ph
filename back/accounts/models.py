@@ -20,7 +20,7 @@ class User(AbstractUser):
     fav_place = models.CharField(max_length=100, blank=True, null=True)  # 선택 사항
     is_superuser = models.BooleanField(default=False)
     deposits = models.ManyToManyField(Deposit,related_name='users',blank=True)
-    savings = models.ManyToManyField(Saving,related_name='user',blank=True)
+    savings = models.ManyToManyField(Saving,related_name='users',blank=True)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['name','email']

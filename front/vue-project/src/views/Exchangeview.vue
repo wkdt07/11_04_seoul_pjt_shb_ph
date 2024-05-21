@@ -2,6 +2,10 @@
 import { ref, onMounted, watch } from 'vue'
 import axios from 'axios'
 import { useCounterStore } from '../stores/counter';
+import Map from '@/components/Map.vue'
+import { RouterView, RouterLink } from 'vue-router'
+
+
 
 const store = useCounterStore()
 
@@ -130,6 +134,10 @@ const inputEventKrw = () => {
       </div>
     </form>
   </div>
+
+<Map/>
+<!-- <RouterLink :to="{name:"MapView"}"></RouterLink> -->
+
 </template>
 
 

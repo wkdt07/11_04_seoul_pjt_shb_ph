@@ -4,20 +4,20 @@ from .models import User
 from dj_rest_auth.registration.serializers import RegisterSerializer
 from compare.serializer import ContractDepositSerializer, ContractSavingSerializer
 
-class UserInfoSerializer(serializers.ModelSerializer):
-    profile_img = serializers.ImageField(use_url=True)
-    contract_deposit = ContractDepositSerializer(many=True, read_only=True)
-    contract_saving = ContractSavingSerializer(many=True, read_only=True)
+# class UserInfoSerializer(serializers.ModelSerializer):
+#     profile_img = serializers.ImageField(use_url=True)
+#     contract_deposit = ContractDepositSerializer(many=True, read_only=True)
+#     contract_saving = ContractSavingSerializer(many=True, read_only=True)
 
-    class Meta:
-        model = User
-        fields = [
-           'id', 'username', 'nickname','name', 'email', 'profile_img', 'financial_products', 
-            'age', 'now_money', 'money_per_year', 'desire_amount_saving', 
-            'desire_amount_deposit', 'deposit_period', 'saving_period', 
-            'fav_place', 'is_superuser', 'contract_deposit', 'contract_saving'
-        ]
-        read_only_fields = ['id', 'username', 'is_superuser']
+#     class Meta:
+#         model = User
+#         fields = [
+#            'id', 'username', 'nickname','name', 'email', 'profile_img', 'financial_products', 
+#             'age', 'now_money', 'money_per_year', 'desire_amount_saving', 
+#             'desire_amount_deposit', 'deposit_period', 'saving_period', 
+#             'fav_place', 'is_superuser', 'contract_deposit', 'contract_saving'
+#         ]
+#         read_only_fields = ['id', 'username', 'is_superuser']
 
 
 
@@ -88,8 +88,8 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     
 class UserInfoSerializer(serializers.ModelSerializer):
     profile_img = serializers.ImageField(use_url=True)
-    contract_deposit = ContractDepositSerializer(many=True, read_only=True)
-    contract_saving = ContractSavingSerializer(many=True, read_only=True)
+    deposits = ContractDepositSerializer(many=True, read_only=True)
+    savings = ContractSavingSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
@@ -97,7 +97,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
             'id', 'username', 'name', 'email', 'profile_img', 'financial_products', 
             'age', 'now_money', 'money_per_year', 'desire_amount_saving', 
             'desire_amount_deposit', 'deposit_period', 'saving_period', 
-            'fav_place', 'is_superuser', 'contract_deposit', 'contract_saving','nickname',
+            'fav_place', 'is_superuser', 'deposits', 'savings','nickname',
         ]
         read_only_fields = ['id', 'username', 'is_superuser']
         

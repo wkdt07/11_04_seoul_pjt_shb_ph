@@ -1,4 +1,4 @@
-<script setup>
+<!-- <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import BarChart from '@/components/BarChartView.vue'
 import BarChartDetail from '@/components/BarChartDetailView.vue'
@@ -583,4 +583,18 @@ tbody > tr:hover {
   height: 80px;
   border-width: 5px;
 }
+</style> -->
+
+<template>
+  <div>
+
+  </div>
+</template>
+
+<script setup>
+
+</script>
+
+<style lang="scss" scoped>
+
 </style>

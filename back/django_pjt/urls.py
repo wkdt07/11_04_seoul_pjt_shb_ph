@@ -27,7 +27,8 @@ urlpatterns = [
     path('articles/',include('CRUD.urls')),
     path('exchange/',include('exchange.urls')),
     path('users/',include('accounts.urls')),
-    path('financial/',include('compare.urls'))
+    path('financial/',include('compare.urls')),
+    path('bot/',include('bot.urls'))
 ] + static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)
 
 

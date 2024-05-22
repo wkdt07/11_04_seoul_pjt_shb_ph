@@ -16,7 +16,10 @@ export const useCounterStore = defineStore('counter', () => {
   const userContractDeposits = ref(null);
   const userContractSavings = ref(null);
 
-  
+  // watch(userInfo, () => {
+  //   userContractDeposits.value = userInfo.value?.contract_deposit || [];
+  //   userContractSavings.value = userInfo.value?.contract_saving || [];
+  // });
   const isLogin = computed(() => {
     return token.value !== null && userInfo.value !== null && userInfo.value.username !== undefined;
   });
@@ -304,7 +307,65 @@ export const useCounterStore = defineStore('counter', () => {
       }
     }
   };
+  const addDepositUser = async (depositCode) => {
+    try {
+      const response = await axios.post(`${DJANGO_URL}/financial/deposit_list/${depositCode}/contract/`, null, {
+        headers: {
+          Authorization: `Token ${token.value}`
+        }
+      });
+      await getUserInfo(userInfo.value.username);  // 사용자 정보 갱신
+      alert('예금 가입이 완료되었습니다.');
+    } catch (err) {
+      console.log(err);
+      alert('예금 가입에 실패했습니다.');
+    }
+  };
 
+  const deleteDepositUser = async (depositCode) => {
+    try {
+      await axios.delete(`${DJANGO_URL}/financial/deposit_list/${depositCode}/contract/`, {
+        headers: {
+          Authorization: `Token ${token.value}`
+        }
+      });
+      await getUserInfo(userInfo.value.username);  // 사용자 정보 갱신
+      alert('예금 탈퇴가 완료되었습니다.');
+    } catch (err) {
+      console.log(err);
+      alert('예금 탈퇴에 실패했습니다.');
+    }
+  };
+
+  const addSavingUser = async (savingCode) => {
+    try {
+      const response = await axios.post(`${DJANGO_URL}/financial/saving_list/${savingCode}/contract/`, null, {
+        headers: {
+          Authorization: `Token ${token.value}`
+        }
+      });
+      await getUserInfo(userInfo.value.username);  // 사용자 정보 갱신
+      alert('적금 가입이 완료되었습니다.');
+    } catch (err) {
+      console.log(err);
+      alert('적금 가입에 실패했습니다.');
+    }
+  };
+  
+  const deleteSavingUser = async (savingCode) => {
+    try {
+      await axios.delete(`${DJANGO_URL}/financial/saving_list/${savingCode}/contract/`, {
+        headers: {
+          Authorization: `Token ${token.value}`
+        }
+      });
+      await getUserInfo(userInfo.value.username);  // 사용자 정보 갱신
+      alert('적금 탈퇴가 완료되었습니다.');
+    } catch (err) {
+      console.log(err);
+      alert('적금 탈퇴에 실패했습니다.');
+    }
+  };
   // 제발!!!!!!!!!!!!!!!리턴해!!!!!!!!!!!!!!!!!!!!!!!!!!!
   return { 
     articles, 
@@ -329,6 +390,10 @@ export const useCounterStore = defineStore('counter', () => {
     DJANGO_URL,
     deleteComment,
     editComment,
-    updateProfile
+    updateProfile,
+    addDepositUser,
+    deleteDepositUser,
+    addSavingUser,
+    deleteSavingUser,
   };
 }, { persist: true });

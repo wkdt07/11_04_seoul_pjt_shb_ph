@@ -16,6 +16,7 @@ import EditView from '@/views/EditView.vue'
 import ProfileEditView from '@/views/ProfileEditView.vue'
 import SavingListView from '@/components/SavingListView.vue'
 import CompareView from '@/views/CompareView.vue'
+// import ContractedProductView from '@/views/ContractedProductView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -108,6 +109,8 @@ const router = createRouter({
       name: 'EditView',
       component: EditView
     },
+
+
 
 ]
 })

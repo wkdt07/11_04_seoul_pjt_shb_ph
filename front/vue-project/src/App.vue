@@ -1,132 +1,3 @@
-  <!--
-
-    <script setup>
-    import { RouterView, RouterLink } from 'vue-router'
-    import { useCounterStore } from './stores/counter';
-    import { useRouter } from 'vue-router';
-    import Map from '@/components/Map.vue'
-    // import Map from './components/Map.vue';
-    
-    const store = useCounterStore()
-    const router = useRouter()
-    const logOut=function(){
-      store.logOut()
-      router.push({name:'home'})
-    }
-    
-    console.log(store.userInfo)
-    
-    // // if (store.isLogin) {
-      // //   store.getUserInfo(); 
-      // // }
-      
-      import MainPage from './components/MainPage.vue';
-    </script>
-    
-    <template>
-    -->
-      <!-- <MainPage/> -->
-      <!--
-
-        <header>
-          <nav>
-            <RouterLink :to="{name:'home'}">MainPage</RouterLink><hr>
-            <RouterLink :to="{ name: 'ArticleView'}">Articles</RouterLink><hr>
-            <RouterLink :to="{ name: 'SignUpView'}">SignUpPage</RouterLink><hr>
-            <RouterLink :to="{ name: 'LoginView'}">LoginPage</RouterLink><hr>
-            <RouterLink :to="{name:'MapView'}">Map</RouterLink><hr>
-            <RouterLink :to="{name:'DepositListView'}">금리비교</RouterLink><hr>
-            <RouterLink :to="{name:'ExchangeView'}">환율계산기</RouterLink><hr>
-            <RouterLink v-if="store.userInfo" :to="{name:'ProfileView',params:{username:store.userInfo.username}}" >
-              {{ store.userInfo.username }}의 프로필</RouterLink> <hr>
-              
-              
-              <button v-if="store.isLogin" @click.prevent="logOut">로그아웃</button>
-              
-            </nav>
-          </header>
-          
-          <RouterView />
-        -->
-          <!-- v-if="store.isLogin && store.userInfo"  -->
-          <!-- <RouterView/> -->
-        <!-- </template>
-
-<style scoped>
-  
-</style> -->
-
-<!-- 
-<script setup>
-import { RouterView, RouterLink } from 'vue-router'
-import { useCounterStore } from './stores/counter';
-import { useRouter } from 'vue-router';
-import Map from '@/components/Map.vue'
-
-const store = useCounterStore()
-const router = useRouter()
-const logOut = function(){
-  store.logOut()
-  router.push({name:'home'})
-}
-
-console.log(store.userInfo)
-</script>
-
-<template>
-  <header class="-01">
-    <nav class="-01">
-      <div class="peek_logo_only-removebg-preview-2"></div>
-      <RouterLink class="Peek" :to="{name:'home'}">MainPage</RouterLink>
-      <RouterLink class="Peek" :to="{ name: 'ArticleView'}">Articles</RouterLink>
-      <RouterLink class="Peek" :to="{ name: 'SignUpView'}">SignUpPage</RouterLink>
-      <RouterLink class="Peek" :to="{ name: 'LoginView'}">LoginPage</RouterLink>
-      <RouterLink class="Peek" :to="{name:'MapView'}">Map</RouterLink>
-      <RouterLink class="Peek" :to="{name:'DepositListView'}">금리비교</RouterLink>
-      <RouterLink class="Peek" :to="{name:'ExchangeView'}">환율계산기</RouterLink>
-      <RouterLink class="Peek" v-if="store.userInfo" :to="{name:'ProfileView',params:{username:store.userInfo.username}}">
-        {{ store.userInfo.username }}의 프로필
-      </RouterLink>
-      <button class="Rectangle-2" v-if="store.isLogin" @click.prevent="logOut">로그아웃</button>
-    </nav>
-  </header>
-
-  <RouterView />
-</template>
-
-<style scoped>
-.-01 {
-  width: 1536px;
-  height: 70px;
-  padding: 10px 20px 14px 39px;
-  background-color: #fff;
-  display: flex;
-  align-items: center;
-}
-
-.Peek {
-  margin: 0 10px;
-  font-family: Maplestory;
-  font-size: 25px;
-  font-weight: bold;
-  line-height: 1.51;
-  color: #001e44;
-}
-
-.Rectangle-2 {
-  width: 125px;
-  height: 40px;
-  margin: 5px;
-  border-radius: 5px;
-  background-color: #f5f5f5;
-}
-
-.peek_logo_only-removebg-preview-2 {
-  width: 45px;
-  height: 45.3px;
-  margin-right: 10px;
-}
-</style> -->
 
 <script setup>
 import { RouterView, RouterLink } from 'vue-router'
@@ -169,14 +40,14 @@ console.log(store.userInfo)
         <RouterLink class="nav-link" v-if="store.userInfo" :to="{name:'ProfileView',params:{username:store.userInfo.username}}">
           {{ store.userInfo.username }}의 프로필
         </RouterLink>
-      </nav>
-      <div class="user-actions">
-        <button class="logout-button" v-if="store.isLogin" @click.prevent="logOut">로그아웃</button>
-      </div>
-      <div class="user-actions">
+        <div class="user-actions">
 
-        <button class="logout-button"@click.prevent="goBack">뒤로가기</button>
-      </div>
+  <RouterLink class="button-link" :to="{ name: 'SignUpView' }" v-if="!store.isLogin">회원가입</RouterLink>
+  <RouterLink class="button-link" :to="{ name: 'LoginView'}" v-if="!store.isLogin">로그인</RouterLink>
+  <button class="logout-button" v-if="store.isLogin" @click.prevent="logOut">로그아웃</button>
+  <button class="logout-button" @click.prevent="goBack">뒤로가기</button>
+</div>
+      </nav>
     </div>
   </header>
 
@@ -184,6 +55,21 @@ console.log(store.userInfo)
 </template>
 
 <style scoped>
+
+.button-link {
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 0 5px;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+}
+
+.button-link:hover {
+  background-color: #0056b3;
+}
 .navbar {
   width: 100%;
   background-color: #fff;

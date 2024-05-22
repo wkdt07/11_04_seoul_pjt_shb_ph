@@ -18,18 +18,10 @@ from django.contrib import admin
 from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
-
+from . import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/',include('dj_rest_auth.urls')),
-    path('accounts/registration/',include('dj_rest_auth.registration.urls')),
-    path('articles/',include('CRUD.urls')),
-    path('exchange/',include('exchange.urls')),
-    path('users/',include('accounts.urls')),
-    path('financial/',include('compare.urls')),
-    path('bot/',include('bot.urls')),
-    path('real_estate/',include('real_estate.urls')),    
-] + static(settings.MEDIA_URL,document_root = settings.MEDIA_ROOT)
+    path('make_data/',views.make_data)
+]
 
 

@@ -1,0 +1,51 @@
+# import requests
+
+# url = 'http://openapi.molit.go.kr:8081/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTrade'
+# params ={'serviceKey' : 'a8T35jcnXvB0LAPhYhzpijuU+Ycuu8AYpck3L1FSmoHiBxNQWw/QBQ9qGB7eKKeBxP3VojixO/0navzqDV1SIg==', 'LAWD_CD' : '11110', 'DEAL_YMD' : '201512' }
+
+# response = requests.get(url, params=params).json()
+# print(response.content)
+
+
+import requests
+import xml.etree.ElementTree as ET
+import json
+from collections import defaultdict
+url = 'http://openapi.molit.go.kr:8081/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTrade'
+params = {
+    'serviceKey': 'a8T35jcnXvB0LAPhYhzpijuU+Ycuu8AYpck3L1FSmoHiBxNQWw/QBQ9qGB7eKKeBxP3VojixO/0navzqDV1SIg==',
+    'LAWD_CD': '11110',
+    'DEAL_YMD': '201512'
+}
+
+response = requests.get(url, params=params)
+root = ET.fromstring(response.content)
+
+def xml_to_dict(element):
+    # 현재 엘리먼트의 속성을 포함한 딕셔너리 생성
+    node = {element.tag: {} if element.attrib else None}
+
+    children = list(element)
+    if children:
+        dd = defaultdict(list)
+        for dc in map(xml_to_dict, children):
+            for k, v in dc.items():
+                dd[k].append(v)
+        node = {element.tag: {k: v[0] if len(v) == 1 else v for k, v in dd.items()}}
+    if element.attrib:
+        node[element.tag].update(('@' + k, v) for k, v in element.attrib.items())
+    if element.text:
+        text = element.text.strip()
+        if children or element.attrib:
+            if text:
+                node[element.tag]['#text'] = text
+        else:
+            node[element.tag] = text
+    return node
+
+# XML을 딕셔너리로 변환
+data_dict = xml_to_dict(root)
+
+# 딕셔너리를 JSON 형식으로 변환
+json_data = json.dumps(data_dict, ensure_ascii=False, indent=4)
+print(json_data)

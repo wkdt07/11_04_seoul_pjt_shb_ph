@@ -21,7 +21,12 @@ from django.conf.urls.static import static
 from . import views
 
 urlpatterns = [
-    path('make_data/',views.make_data)
+    path('make_data/',views.make_data),
+    path('',views.RealEstateListCreateView.as_view()),
+    path('get_regions/',views.get_regions),
+    path('recent/<str:region>/', views.get_recent_real_estate, name='get_real_estate'),
+    path('link/', views.link_real_estate_to_user, name='link_real_estate_to_user'),
+    path('<int:real_estate_id>/unlink_user/', views.unlink_real_estate_from_user, name='unlink_real_estate_from_user'),
 ]
 
 

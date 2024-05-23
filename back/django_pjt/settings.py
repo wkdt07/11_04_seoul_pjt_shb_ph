@@ -34,7 +34,8 @@ ALLOWED_HOSTS = [
 AUTH_USER_MODEL = 'accounts.User'
 
 INSTALLED_APPS = [
-    'bot',
+    'real_estate',
+    # 'bot',
     'exchange',
     'compare',
     'CRUD',

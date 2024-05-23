@@ -24,7 +24,7 @@ import axios from 'axios'
 import { ref } from 'vue'
 import { useCounterStore } from '@/stores/counter'
 import { useRouter } from 'vue-router'
-import ArticleListItem from '../components/ArticleListItem.vue';
+import ArticleListItem from '@/components/ArticleListItem.vue';
 
 const store = useCounterStore()
 const title = ref(null)
@@ -39,27 +39,6 @@ console.log('store:', store)
 const onFileChange = (e) => {  
   image.value = e.target.files[0]
 }
-
-// const createArticle = function () {
-//   console.log('Creating article with URL:', `${store.DJANGO_URL}/articles/`)
-//   axios({
-//     method: 'post',
-//     url: `${store.DJANGO_URL}/articles/`,
-//     data: {
-//       title: title.value,
-//       content: content.value
-//     },  
-//     headers:{
-//         Authorization:`Token ${store.token}`
-//     }
-//   })
-//     .then((response) => {
-//       router.push({ name: 'ArticleView' })
-//     })
-//     .catch((error) => {
-//       console.log(error)
-//     })
-// }
 
 const createArticle = async () => {
   const formData = new FormData()

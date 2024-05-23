@@ -16,6 +16,7 @@ import EditView from '@/views/EditView.vue'
 import ProfileEditView from '@/views/ProfileEditView.vue'
 import SavingListView from '@/components/SavingListView.vue'
 import CompareView from '@/views/CompareView.vue'
+import RealEstateView from '@/views/RealEstateView.vue'
 // import ContractedProductView from '@/views/ContractedProductView.vue'
 
 const router = createRouter({
@@ -109,7 +110,11 @@ const router = createRouter({
       name: 'EditView',
       component: EditView
     },
-
+    {
+      path:'/realEstate',
+      name:'RealEstateView',
+      component:RealEstateView
+    }
 
 
 ]

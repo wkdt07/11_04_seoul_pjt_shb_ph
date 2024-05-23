@@ -1,12 +1,3 @@
-# import requests
-
-# url = 'http://openapi.molit.go.kr:8081/OpenAPI_ToolInstallPackage/service/rest/RTMSOBJSvc/getRTMSDataSvcAptTrade'
-# params ={'serviceKey' : 'a8T35jcnXvB0LAPhYhzpijuU+Ycuu8AYpck3L1FSmoHiBxNQWw/QBQ9qGB7eKKeBxP3VojixO/0navzqDV1SIg==', 'LAWD_CD' : '11110', 'DEAL_YMD' : '201512' }
-
-# response = requests.get(url, params=params).json()
-# print(response.content)
-
-
 import requests
 import xml.etree.ElementTree as ET
 import json

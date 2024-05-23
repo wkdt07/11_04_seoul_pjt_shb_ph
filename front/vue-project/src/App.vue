@@ -33,7 +33,7 @@ console.log(store.userInfo)
         <RouterLink class="nav-link" :to="{name:'MapView'}">Map</RouterLink>
         <RouterLink class="nav-link" :to="{name:'CompareView'}">금리비교</RouterLink>
         
-        <!-- <RouterLink class="nav-link" :to="{name:'SavingListView'}">적금테스트</RouterLink> -->
+        <RouterLink class="nav-link" :to="{name:'RealEstateView'}">부동산 테스트</RouterLink>
 
         <RouterLink class="nav-link" :to="{name:'ExchangeView'}">환율계산기</RouterLink>
 

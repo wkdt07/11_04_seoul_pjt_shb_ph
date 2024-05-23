@@ -1,6 +1,3 @@
-from django.shortcuts import render
-
-# Create your views here.
 from collections import Counter
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
@@ -14,119 +11,137 @@ from rest_framework import status
 from accounts.models import User
 
 import requests
-from .serializer import *
-from .models import *
+from .serializers import RealEstateSerializer
+from .models import RealEstate
 from datetime import datetime
 from django.core.exceptions import ValidationError
 
+REAL_ESTATE_API_KEY = 'a8T35jcnXvB0LAPhYhzpijuU%2BYcuu8AYpck3L1FSmoHiBxNQWw%2FQBQ9qGB7eKKeBxP3VojixO%2F0navzqDV1SIg%3D%3D'
+URL = f'https://api.odcloud.kr/api/15069826/v1/uddi:c921d88a-6deb-4904-a658-e1fdb5437c92?page=1&perPage=236&serviceKey={REAL_ESTATE_API_KEY}'
 
-def make_data(request):
-    pass
+
+from collections import Counter
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import get_user_model
+from django.http import HttpResponse,JsonResponse
+from django.conf import settings
+from django.db.models import Q
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes 
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from accounts.models import User
+
+import requests
+from .serializers import RealEstateSerializer
+from .models import RealEstate
+from datetime import datetime
+from django.core.exceptions import ValidationError
+
+REAL_ESTATE_API_KEY = 'a8T35jcnXvB0LAPhYhzpijuU%2BYcuu8AYpck3L1FSmoHiBxNQWw%2FQBQ9qGB7eKKeBxP3VojixO%2F0navzqDV1SIg%3D%3D'
+URL = f'https://api.odcloud.kr/api/15069826/v1/uddi:c921d88a-6deb-4904-a658-e1fdb5437c92?page=1&perPage=236&serviceKey={REAL_ESTATE_API_KEY}'
 
 @api_view(['GET'])
-def make_financial_data(request):
-    BANK_API_KEY = '074e4e4a11eff3c68e5cd75a1e2b442a'
-    DEPOSIT_API_URL = f'http://finlife.fss.or.kr/finlifeapi/depositProductsSearch.json?auth={BANK_API_KEY}&topFinGrpNo=020000&pageNo=1'
-    SAVING_API_URL = f'http://finlife.fss.or.kr/finlifeapi/savingProductsSearch.json?auth={BANK_API_KEY}&topFinGrpNo=020000&pageNo=1'
+@permission_classes([IsAuthenticated])
+def make_data(request):
+    
+    if RealEstate.objects.exists():
+        return Response({'message': 'Data already exists.'}, status=status.HTTP_200_OK)
 
-    deposit_res = requests.get(DEPOSIT_API_URL).json()
-    deposit_baseList = deposit_res.get('result').get('baseList')
-    deposit_optionList = deposit_res.get('result').get('optionList')
+    real_estate_data = requests.get(URL).json()
 
-    for base in deposit_baseList:
-        if Deposit.objects.filter(fin_prdt_cd=base.get('fin_prdt_cd')).exists():
-            continue
+    # 데이터 가공 및 저장
+    try:
+        for entry in real_estate_data.get('data', []):
+            region = entry.get('지 역')  # 지역 설정
 
-        # 날짜 형식 변환 ('YYYYMM' -> 'YYYY-MM-DD')
-        dcls_month_str = base.get('dcls_month', '-1')
-        dcls_month = datetime.strptime(dcls_month_str, '%Y%m').date() if dcls_month_str != '-1' else None
+            if not region:
+                continue  # 지역 정보가 없는 경우 건너뜀
 
-        save_product = {
-            'fin_prdt_cd': base.get('fin_prdt_cd', '-1'),
-            'fin_co_no': base.get('fin_co_no', '-1'),
-            'kor_co_nm': base.get('kor_co_nm', '-1'),
-            'fin_prdt_nm': base.get('fin_prdt_nm', '-1'),
-            'dcls_month': dcls_month,
-            'mtrt_int': base.get('mtrt_int', '-1'),  # 그대로 문자열로 처리
-            'etc_note': base.get('etc_note', '-1'),
-            'join_deny': base.get('join_deny', -1),
-            'join_member': base.get('join_member', '-1'),
-            'join_way': base.get('join_way', '-1'),
-            'spcl_cnd': base.get('spcl_cnd', '-1'),
-            'max_limit': base.get('max_limit', -1),
-            'dcls_strt_day': base.get('dcls_strt_day', '2024-01-01') or '2024-01-01',  # 기본값 설정
-            'dcls_end_day': base.get('dcls_end_day', '2024-12-31') or '2024-12-31',  # 기본값 설정
-            'fin_co_subm_day': base.get('fin_co_subm_day', '2024-01-01') or '2024-01-01'  # 기본값 설정
-        }
+            # 날짜와 가격 데이터 추출
+            for key, value in entry.items():
+                if key == '지 역':
+                    continue
+                date_time = key
+                price = value
 
-        serializer = DepositSerializer(data=save_product)
-        if serializer.is_valid(raise_exception=True):
-            product = serializer.save()
+                # 디버깅 로그 추가
+                print(f"Processing entry - date_time: {date_time}, price: {price}, region: {region}")
 
-            # 관련된 옵션 추가
-            related_options = [opt for opt in deposit_optionList if opt['fin_prdt_cd'] == base['fin_prdt_cd']]
-            for option in related_options:
-                save_option = {
-                    'deposit': product.id,
-                    'intr_rate_type': option.get('intr_rate_type', '0'),  # 기본값 설정
-                    'intr_rate_type_nm': option.get('intr_rate_type_nm', '-1'),
-                    'intr_rate': option.get('intr_rate', -1),
-                    'intr_rate2': option.get('intr_rate2', -1),
-                    'save_trm': option.get('save_trm', -1),
-                }
-                option_serializer = DepositOptionsSerializer(data=save_option)
-                if option_serializer.is_valid(raise_exception=True):
-                    option_serializer.save(deposit=product)
+                # date_time과 price가 None이 아닌지 확인
+                if date_time and price is not None:
+                    # 날짜 형식 변환
+                    try:
+                        datetime.strptime(date_time, '%Y-%m')
+                    except ValueError:
+                        print(f"Skipping invalid date format: {date_time}")
+                        continue  # 잘못된 날짜 형식은 무시
 
-    saving_res = requests.get(SAVING_API_URL).json()
-    saving_baseList = saving_res.get('result').get('baseList')
-    saving_optionList = saving_res.get('result').get('optionList')
+                    # 데이터 저장
+                    real_estate, created = RealEstate.objects.update_or_create(
+                        date_time=date_time,
+                        region=region,  # date_time과 region을 키로 설정
+                        defaults={
+                            'price': price,
+                            'region': region
+                        }
+                    )
+                    # 디버깅 로그 추가
+                    if created:
+                        print(f"Created new RealEstate: {real_estate}")
+                    else:
+                        print(f"Updated existing RealEstate: {real_estate}")
 
-    for base in saving_baseList:
-        if Saving.objects.filter(fin_prdt_cd=base.get('fin_prdt_cd')).exists():
-            continue
+        # 저장된 데이터의 총 개수를 반환하여 확인
+        total_count = RealEstate.objects.count()
+        print(f"Total RealEstate records: {total_count}")
 
-        # 날짜 형식 변환 ('YYYYMM' -> 'YYYY-MM-DD')
-        dcls_month_str = base.get('dcls_month', '-1')
-        dcls_month = datetime.strptime(dcls_month_str, '%Y%m').date() if dcls_month_str != '-1' else None
+        return Response({'message': 'Data successfully created or updated.'}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        print(f"Error occurred: {str(e)}")  # 디버깅 로그 추가
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        save_product = {
-            'fin_prdt_cd': base.get('fin_prdt_cd', '-1'),
-            'fin_co_no': base.get('fin_co_no', '-1'),
-            'kor_co_nm': base.get('kor_co_nm', '-1'),
-            'fin_prdt_nm': base.get('fin_prdt_nm', '-1'),
-            'dcls_month': dcls_month,
-            'mtrt_int': base.get('mtrt_int', '-1'),  # 그대로 문자열로 처리
-            'etc_note': base.get('etc_note', '-1'),
-            'join_deny': base.get('join_deny', -1),
-            'join_member': base.get('join_member', '-1'),
-            'join_way': base.get('join_way', '-1'),
-            'spcl_cnd': base.get('spcl_cnd', '-1'),
-            'max_limit': base.get('max_limit', -1),
-            'dcls_strt_day': base.get('dcls_strt_day', '2024-01-01') or '2024-01-01',  # 기본값 설정
-            'dcls_end_day': base.get('dcls_end_day', '2024-12-31') or '2024-12-31',  # 기본값 설정
-            'fin_co_subm_day': base.get('fin_co_subm_day', '2024-01-01') or '2024-01-01'  # 기본값 설정
-        }
+@api_view(['GET'])
+def get_regions(request):
+    regions = RealEstate.objects.values_list('region', flat=True).distinct()
+    return Response(regions, status=status.HTTP_200_OK)
 
-        serializer = SavingSerializer(data=save_product)
-        if serializer.is_valid(raise_exception=True):
-            product = serializer.save()
+from rest_framework import generics, permissions
 
-            # 관련된 옵션 추가
-            related_options = [opt for opt in saving_optionList if opt['fin_prdt_cd'] == base['fin_prdt_cd']]
-            for option in related_options:
-                save_option = {
-                    'saving': product.id,
-                    'intr_rate_type': option.get('intr_rate_type', '0'),  # 기본값 설정
-                    'intr_rate_type_nm': option.get('intr_rate_type_nm', '-1'),
-                    'rsrv_type': option.get('rsrv_type', '0'),  # 기본값 설정
-                    'rsrv_type_nm': option.get('rsrv_type_nm', '-1'),
-                    'intr_rate': option.get('intr_rate', -1),
-                    'intr_rate2': option.get('intr_rate2', -1),
-                    'save_trm': option.get('save_trm', -1),
-                }
-                option_serializer = SavingOptionsSerializer(data=save_option)
-                if option_serializer.is_valid(raise_exception=True):
-                    option_serializer.save(saving=product)
+class RealEstateListCreateView(generics.ListCreateAPIView):
+    queryset = RealEstate.objects.all()
+    serializer_class = RealEstateSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-    return HttpResponse("금융 데이터 생성 완료")
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+# @permission_classes([IsAuthenticated])
+@api_view(['GET'])
+def get_recent_real_estate(request, region):
+    recent_real_estate = RealEstate.objects.filter(region=region, price__isnull=False).order_by('-date_time').first()
+    if recent_real_estate:
+        return Response({
+            'id': recent_real_estate.id,
+            'price': recent_real_estate.price,
+            'date_time': recent_real_estate.date_time
+        })
+    return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+@permission_classes([IsAuthenticated])
+@api_view(['POST'])
+def link_real_estate_to_user(request):
+    real_estate_id = request.data.get('real_estate_id')
+    user = request.user
+    real_estate = get_object_or_404(RealEstate, id=real_estate_id)
+    real_estate.users.add(user)
+    return Response({'detail': 'Real estate linked successfully.'})
+
+@permission_classes([IsAuthenticated])
+@api_view(['POST'])
+def unlink_real_estate_from_user(request, real_estate_id):
+    real_estate = get_object_or_404(RealEstate, id=real_estate_id)
+    user = request.user
+    real_estate.users.remove(user)
+    return JsonResponse({'status': 'unlinked'})

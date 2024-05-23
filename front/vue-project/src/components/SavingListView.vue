@@ -4245,7 +4245,7 @@ tbody>tr:hover {
      -->
 
 
-
+<!-- 
      <template>
       <div>
         <header class="d-flex justify-space-between">
@@ -4685,4 +4685,478 @@ tbody>tr:hover {
       border-radius: 4px;
     }
     </style>
+     -->
+
+
+
+
+     <template>
+      <div>
+        <header class="d-flex justify-space-between header-style">
+          <h1><span class="color">정기적금</span> 검색하기</h1>
     
+          <div class="search-container">
+            <select v-model="selectedBank" @change="clickBank" class="ml-auto bank-select custom-select">
+              <option v-for="bank in banks" :key="bank">{{ bank }}</option>
+            </select>
+            <button @click="reset" class="custom-button">리셋</button>
+          </div>
+        </header>
+        <hr class="my-3">
+    
+        <div v-if="dialog" class="dialog" @click.self="close">
+          <div class="dialog-content">
+            <div class="dialog-header">
+              <h3>{{ selectedSaving?.['금융 상품명'] }}</h3>
+              <div v-if="store.isLogin" class="dialog-buttons">
+                <button v-if="isContractSaving" @click.prevent="deleteSavingUser" class="custom-button">가입 취소하기</button>
+                <button v-else @click.prevent="addSavingUser" class="custom-button">가입하기</button>
+              </div>
+            </div>
+    
+            <table class="dialog-table">
+              <tbody>
+                <tr v-for="(value, key) in selectedSaving" :key="key" class="dialog-table-row">
+                  <td class="dialog-table-key">{{ key }}</td>
+                  <td class="dialog-table-value" v-if="key === '최고 한도'">
+                    {{ value?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") }}</td>
+                  <td class="dialog-table-value" v-else>{{ value }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <hr class="my-3">
+            <div class="mx-auto">
+              <div v-if="savingType === 'F'">
+                <BarChartDetailSaving :title="selectedSavingSimple.name + ' (자유적립형)'" :labels="selectedSaving.freedomLabels"
+                  :intr-rate="intrRateFreedom" :intr-rate2="intrRate2Freedom" saving-type="자유적립형" />
+              </div>
+              <div v-else-if="savingType === 'S'">
+                <BarChartDetailSaving :title="selectedSavingSimple.name + ' (정기적금형)'" :labels="selectedSaving.regularLabels"
+                  :intr-rate="intrRateRegular" :intr-rate2="intrRate2Regular" saving-type="정기적금형" />
+              </div>
+              <div v-else-if="savingType === 'BOTH'">
+                <BarChartDetailSaving :title="selectedSavingSimple.name + ' (자유적립형)'" :labels="selectedSaving.freedomLabels"
+                  :intr-rate="intrRateFreedom" :intr-rate2="intrRate2Freedom" saving-type="자유적립형" />
+                <BarChartDetailSaving :title="selectedSavingSimple.name + ' (정기적금형)'" :labels="selectedSaving.regularLabels"
+                  :intr-rate="intrRateRegular" :intr-rate2="intrRate2Regular" saving-type="정기적금형" />
+              </div>
+              <p class="text-caption">* 차트에 없는 이자율은 상품에 존재하지 않는 옵션입니다.</p>
+            </div>
+          </div>
+        </div>
+    
+        <div v-if="loading" class="loading">
+          <div class="progress-circular"></div>
+        </div>
+        <table v-else-if="savingLength !== 0" class="table">
+          <thead>
+            <tr>
+              <th v-for="header in headers" :key="header.key" :align="header.align" :width="header.width"
+                @click="sort(header.key)">
+                {{ header.title }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in savings" :key="item.saving_code" @click="clickRow(item)">
+              <td>{{ item['dcls_month'] }}</td>
+              <td>{{ item['kor_co_nm'] }}</td>
+              <td align="center">{{ item['name'] }}</td>
+              <td align="center">{{ item['max_intr_rate2'] }}</td>
+            </tr>
+          </tbody>
+        </table>
+    
+        <div v-else class="loading">
+          <div class="progress-circular"></div>
+        </div>
+      </div>
+    </template>
+        
+    <script setup>
+    import { ref, onMounted, computed } from 'vue'
+    import { useRouter } from 'vue-router'
+    import { useCounterStore } from '@/stores/counter'
+    import BarChartDetailSaving from '@/components/BarChartDetailSaving.vue'
+    import axios from 'axios'
+    
+    const headers = [
+      { title: '공시 제출일', align: 'start', sortable: false, width: '10%', key: 'dcls_month' },
+      { title: '금융회사명', align: 'start', sortable: false, key: 'kor_co_nm' },
+      { title: '상품명', align: 'center', sortable: false, width: '32%', key: 'name' },
+      { title: '최고우대금리', align: 'end', width: '12%', key: 'max_intr_rate2' },
+    ]
+    
+    const savings = ref([])
+    const savingLength = computed(() => savings.value.length)
+    
+    const banks = ref(['전체 보기'])
+    const selectedBank = ref('전체 보기')
+    const selectedSavingSimple = ref(null)
+    const selectedSaving = ref(null)
+    const selectedSavingCode = computed(() => selectedSavingSimple.value?.['saving_code'])
+    const dialog = ref(false)
+    const loading = ref(false)
+    const sortKey = ref('')
+    const sortOrder = ref(1) // 1: ascending, -1: descending
+    
+    const intrRateFreedom = ref([])
+    const intrRate2Freedom = ref([])
+    const intrRateRegular = ref([])
+    const intrRate2Regular = ref([])
+    
+    const savingType = ref('NONE')
+    
+    const isContractSaving = computed(() => {
+      const userInfo = useCounterStore().userInfo;
+    
+      if (!userInfo) {
+        console.error("userInfo is undefined");
+        return false;
+      }
+    
+      const contractSavingArray = Array.isArray(userInfo.savings) ? userInfo.savings : [];
+      return contractSavingArray.some(e => e['fin_prdt_cd'] === selectedSavingCode.value);
+    });
+    
+    const store = useCounterStore()
+    const router = useRouter()
+    
+    const makeItems = function (item) {
+      const result = {
+        'saving_code': item['fin_prdt_cd'],
+        'dcls_month': item['dcls_month'],
+        'kor_co_nm': item['kor_co_nm'],
+        'name': item['fin_prdt_nm'],
+        'max_intr_rate2': Math.max(...item.options.map(opt => opt.intr_rate2 || 0)),  // 최고우대금리
+        'saving_type': item.options.some(opt => opt.rsrv_type === 'S') ? (item.options.some(opt => opt.rsrv_type === 'F') ? 'BOTH' : 'S') : 'F'  // 상품 타입
+      }
+    
+      return result
+    }
+    
+    const getAllSavings = function () {
+      loading.value = true
+      axios.get(`${store.DJANGO_URL}/financial/saving_list/`)
+        .then((res) => {
+          const results = res.data
+          savings.value = results.map(item => makeItems(item))
+          banks.value = ['전체 보기', ...new Set(results.map(item => item.kor_co_nm))]
+          loading.value = false
+        })
+        .catch((err) => {
+          console.log(err)
+          loading.value = false
+        })
+    }
+    
+    onMounted(() => {
+      getAllSavings()
+    })
+    
+    const clickBank = function () {
+      if (selectedBank.value === '전체 보기') {
+        getAllSavings()
+      } else {
+        loading.value = true
+        axios.get(`${store.DJANGO_URL}/financial/get_bank_saving/${selectedBank.value}/`)
+          .then((res) => {
+            savings.value = res.data.map(item => makeItems(item))
+            loading.value = false
+          })
+          .catch((err) => {
+            console.log(err)
+            loading.value = false
+          })
+      }
+    }
+    
+    const close = function () {
+      dialog.value = false
+    }
+    
+    const clickRow = function (data) {
+      selectedSavingSimple.value = data
+      intrRateFreedom.value = []
+      intrRate2Freedom.value = []
+      intrRateRegular.value = []
+      intrRate2Regular.value = []
+      getSaving()
+      dialog.value = true
+    }
+    
+    const getSaving = async function () {
+      if (!selectedSavingCode.value) {
+        console.error('selectedSavingCode is null or undefined');
+        return;
+      }
+    
+      try {
+        const res = await axios.get(`${store.DJANGO_URL}/financial/saving_list/${selectedSavingCode.value}/`);
+        const data = res.data;
+        console.log("Saving data:", data);  // 데이터 확인용 콘솔 로그 추가
+    
+        const freedomOptions = data.options.filter(option => option.rsrv_type === 'F');
+        const regularOptions = data.options.filter(option => option.rsrv_type === 'S');
+    
+        const freedomLabels = freedomOptions.map(option => `${option.save_trm}개월 금리`);
+        const freedomRates = freedomOptions.map(option => option.intr_rate);
+        const freedomRates2 = freedomOptions.map(option => option.intr_rate2);
+    
+        const regularLabels = regularOptions.map(option => `${option.save_trm}개월 금리`);
+        const regularRates = regularOptions.map(option => option.intr_rate);
+        const regularRates2 = regularOptions.map(option => option.intr_rate2);
+    
+        selectedSaving.value = {
+          '가입자 수': data.contract_users,
+          '공시 제출월': data['dcls_month'],
+          '금융 회사명': data['kor_co_nm'],
+          '금융 상품명': data['fin_prdt_nm'],
+          '가입 방법': data['join_way'],
+          '만기 후 이자율': data['mtrt_int'],
+          '우대 조건': data['spcl_cnd'],
+          '가입 대상': data['join_member'],
+          '가입 제한': data['join_deny'] === 1 ? '제한없음' : data['join_deny'] === 2 ? '서민전용' : '일부제한',
+          '최고 한도': data['max_limit'],
+          '기타 유의사항': data['etc_note'],
+          'freedomLabels': freedomLabels.length ? freedomLabels : ['데이터 없음'],
+          'freedomRates': freedomRates.length ? freedomRates : [0],
+          'freedomRates2': freedomRates2.length ? freedomRates2 : [0],
+          'regularLabels': regularLabels.length ? regularLabels : ['데이터 없음'],
+          'regularRates': regularRates.length ? regularRates : [0],
+          'regularRates2': regularRates2.length ? regularRates2 : [0]
+        };
+    
+        intrRateFreedom.value = freedomRates.length ? freedomRates : [0];
+        intrRate2Freedom.value = freedomRates2.length ? freedomRates2 : [0];
+        intrRateRegular.value = regularRates.length ? regularRates : [0];
+        intrRate2Regular.value = regularRates2.length ? regularRates2 : [0];
+    
+        if (freedomOptions.length && regularOptions.length) {
+          savingType.value = 'BOTH'
+        } else if (freedomOptions.length) {
+          savingType.value = 'F'
+        } else if (regularOptions.length) {
+          savingType.value = 'S'
+        } else {
+          savingType.value = 'NONE'
+        }
+    
+        console.log("freedomRates:", intrRateFreedom.value);
+        console.log("freedomRates2:", intrRate2Freedom.value);
+        console.log("regularRates:", intrRateRegular.value);
+        console.log("regularRates2:", intrRate2Regular.value);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+    
+    const addSavingUser = function () {
+      axios.post(`${store.DJANGO_URL}/financial/saving_list/${selectedSavingCode.value}/contract/`, null, {
+        headers: { Authorization: `Token ${store.token}` }
+      })
+        .then(() => {
+          store.getUserInfo(store.userInfo.username)
+          const answer = window.confirm('저장이 완료되었습니다.\n가입 상품 관리 페이지로 가시겠습니까?')
+          if (answer) {
+            router.push({ name: 'productManage', params: { username: store.userInfo.username } })
+          }
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    }
+    
+    const deleteSavingUser = function () {
+      axios.delete(`${store.DJANGO_URL}/financial/saving_list/${selectedSavingCode.value}/contract/`, {
+        headers: { Authorization: `Token ${store.token}` }
+      })
+        .then(() => {
+          store.getUserInfo(store.userInfo.username)
+        })
+        .catch((err) => {
+          console.log(err)
+        })
+    }
+    
+    const sort = function (key) {
+      sortKey.value = key
+      sortOrder.value *= -1
+    
+      savings.value.sort((a, b) => {
+        if (a[key] < b[key]) return -1 * sortOrder.value
+        if (a[key] > b[key]) return 1 * sortOrder.value
+        return 0
+      })
+    }
+    
+    const reset = function () {
+      selectedBank.value = '전체 보기'
+      getAllSavings()
+    }
+    </script>
+        
+    <style scoped>
+    .loading {
+      display: flex;
+      height: 80vh;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .progress-circular {
+      width: 80px;
+      height: 80px;
+      border: 5px solid #1089FF;
+      border-radius: 50%;
+      border-top: 5px solid transparent;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+    
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    
+    .dialog {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.5);
+      font-family: 'NEXON Lv1 Gothic Low OTF';
+    }
+    
+    .dialog-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 70%;
+      max-width: 90%;
+      max-height: 70%;
+      overflow-y: auto;
+    }
+    
+    .dialog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .dialog-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .dialog-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    .dialog-table-row {
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .dialog-table-key {
+      padding: 8px;
+      font-weight: bold;
+      background-color: #f2f2f2;
+      width: 30%;
+    }
+    
+    .dialog-table-value {
+      padding: 8px;
+    }
+    
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+    
+    tbody>tr {
+      transition: 200ms;
+      cursor: pointer;
+    }
+    
+    tbody>tr:hover {
+      background-color: rgb(247, 250, 253);
+      color: #1089FF;
+    }
+    
+    .table {
+      width: 90%;
+      /* 테이블 너비를 90%로 줄임 */
+      border-collapse: collapse;
+      margin-top: 20px;
+      margin-left: auto;
+      /* 중앙 정렬을 위해 추가 */
+      margin-right: auto;
+      /* 중앙 정렬을 위해 추가 */
+      font-family: 'NEXON Lv1 Gothic Low OTF';
+    }
+    
+    .table th,
+    .table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    
+    .table th {
+      background-color: #f2f2f2;
+      text-align: left;
+    }
+    
+    .bank-select {
+      padding: 10px;
+      border: 1px solid #1089FF;
+      border-radius: 4px;
+      font-family: 'NEXON Lv1 Gothic Low OTF';
+      font-weight: bold;
+    }
+    
+    .custom-button {
+      background-color: #1089FF;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-family: 'NEXON Lv1 Gothic Low OTF';
+    
+    }
+    
+    .custom-button:hover {
+      background-color: #0a73d9;
+    }
+    
+    .custom-select {
+      font-family: 'NEXON Lv1 Gothic Low OTF';
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .header-style h1 {
+      font-family: 'NEXON Lv1 Gothic Low OTF';
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .search-container {
+      display: flex;
+      align-items: center;
+    }
+    
+    .search-container select {
+      margin-right: 10px;
+    }
+    </style>

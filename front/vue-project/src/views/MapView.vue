@@ -1080,7 +1080,10 @@ onMounted(() => {
   </style> -->
 
 
-  <template>
+
+
+  <!-- ===================================기능은 완벽===================================================================== -->
+  <!-- <template>
     <div class="mapview-container">
       <div class="left-panel">
         <form @submit.prevent="search(keyWord)" class="card form-card">
@@ -1371,6 +1374,349 @@ const regions = ref(filteredRegions)
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
+    font-weight: bold;
+  }
+  
+  .submit-button:hover,
+  .search-button:hover {
+    background-color: #40a9ff;
+  }
+  
+  .result-card {
+    padding: 15px;
+  }
+  
+  .result-title {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+  .result-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .result-item {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .result-item h3 {
+    margin: 0;
+    font-size: 1.2em;
+    color: #333;
+  }
+  
+  .result-item p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .result-item a {
+    color: #1890ff;
+    text-decoration: none;
+  }
+  
+  .result-item a:hover {
+    text-decoration: underline;
+  }
+  </style>
+   -->
+
+
+
+   <template>
+    <div class="mapview-container">
+      <div class="left-panel">
+        <form @submit.prevent="search(keyWord)" class="card form-card">
+          <div class="form-group">
+            <label>지역 선택</label>
+            <select v-model="selectedRegion" @change="updateKeyword">
+              <option disabled value="">지역을 선택하세요</option>
+              <option v-for="region in regions" :key="region" :value="region">{{ region }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>은행 종류 (선택 사항)</label>
+            <select v-model="bankType" @change="updateKeyword">
+              <option value="">은행 종류를 선택하세요 (선택 사항)</option>
+              <option v-for="bank in banks" :key="bank" :value="bank">{{ bank }}</option>
+            </select>
+          </div>
+          <button type="submit" class="submit-button">검색</button>
+        </form>
+        <div class="card form-card">
+          <label>직접 검색:</label>
+          <input type="text" v-model="manualKeyword" @input="updateManualKeyword" placeholder="검색어를 입력하세요">
+          <button @click="search(manualKeyword)" class="search-button">검색</button>
+        </div>
+        <KakaoMap v-if="currentLat && currentLng" class="map" :lat="currentLat" :lng="currentLng" @onLoadKakaoMap="onLoadKakaoMap">
+          <KakaoMapMarker v-for="(marker, index) in markerList" :key="index" :lat="marker.lat" :lng="marker.lng" :infoWindow="marker.infoWindow" :clickable="true" @onClickKakaoMapMarker="() => onClickMapMarker(marker)" />
+        </KakaoMap>
+      </div>
+      <div class="right-panel">
+        <div v-if="markerList.length" class="card result-card">
+          <h2 class="result-title">검색 결과</h2>
+          <ul class="result-list">
+            <li v-for="(marker, index) in markerList" :key="index" class="result-item" @click="toggleInfoWindow(marker)">
+              <h3>{{ marker.infoWindow.place_name }}</h3>
+              <p>{{ marker.infoWindow.address_name }}</p>
+              <p>{{ marker.infoWindow.road_address_name }}</p>
+              <p><a :href="marker.infoWindow.place_url" target="_blank">{{ marker.infoWindow.place_url }}</a></p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </template>
+  
+  <script setup>
+  import { KakaoMap, KakaoMapMarker } from 'vue3-kakao-maps';
+  import { ref, onMounted } from 'vue';
+  import { useCounterStore } from '@/stores/counter';
+  
+  const map = ref();
+  const markerList = ref([]);
+  const keyWord = ref('');
+  const manualKeyword = ref('');
+  const currentLat = ref(null);
+  const currentLng = ref(null);
+  const store = useCounterStore();
+  
+  const allRegions = ref([...store.regions]);
+  // 제외할 항목들
+  const excludedRegions = ["전국", "5대광역시", "6대광역시", "8개도", "9개도", '지방권', '서울 도심권'];
+  // '구'를 포함하는 항목을 필터링하는 함수
+  const excludeGuRegions = (region) => {
+    return !region.includes('구');
+  };
+  
+  // 필터링된 regions 배열 생성
+  const filteredRegions = allRegions.value
+    .filter(region => !excludedRegions.includes(region))
+    .filter(excludeGuRegions)
+    .sort();
+  
+  // 최종 regions 배열
+  const regions = ref(filteredRegions);
+  const banks = ['국민은행', '우리은행', '신한은행', '하나은행', '농협은행'];
+  
+  const selectedRegion = ref('');
+  const bankType = ref('');
+  
+  const onLoadKakaoMap = (mapRef) => {
+    map.value = mapRef;
+  };
+  
+  const updateKeyword = () => {
+    keyWord.value = `${selectedRegion.value} ${bankType.value}은행`.trim();
+  };
+  
+  const updateManualKeyword = () => {
+    keyWord.value = manualKeyword.value.trim();
+  };
+  
+  const search = (keyWord) => {
+    // 기존 마커 리스트를 초기화합니다
+    markerList.value = [];
+    const ps = new kakao.maps.services.Places();
+    ps.keywordSearch(keyWord, placesSearchCB);
+  };
+  
+  const placesSearchCB = (data, status) => {
+    if (status === kakao.maps.services.Status.OK) {
+      const bounds = new kakao.maps.LatLngBounds();
+  
+      for (let place of data) {
+        const markerItem = {
+          lat: place.y,
+          lng: place.x,
+          infoWindow: {
+            place_name: place.place_name,
+            address_name: place.address_name,
+            road_address_name: place.road_address_name,
+            place_url: place.place_url,
+            content: `<div
+            style="
+              padding: 10px;
+              background-color: white;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+              display: flex;
+              flex-direction: column;
+              align-items: flex-start;
+            "
+          >
+            <div style="font-weight: bold; margin-bottom: 5px">${place.place_name}</div>
+            <div style="display: flex">
+              <div style="margin-right: 10px">
+                <img src="https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/thumnail.png" width="73" height="70" />
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: flex-start">
+                <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">${place.address_name}</div>
+                <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap">${place.road_address_name}</div>
+                <div><a href="${place.place_url}" target="_blank" style="color: blue">홈페이지</a></div>
+              </div>
+            </div>
+          </div>`,
+            visible: false
+          }
+        };
+        console.log(place)
+        markerList.value.push(markerItem);
+        bounds.extend(new kakao.maps.LatLng(Number(place.y), Number(place.x)));
+      }
+  
+      map.value?.setBounds(bounds);
+    } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
+      alert('검색 결과가 없습니다.');
+    }
+  };
+  
+  const onClickMapMarker = (markerItem) => {
+    markerItem.infoWindow.visible = !markerItem.infoWindow.visible;
+  };
+  
+  const toggleInfoWindow = (markerItem) => {
+    markerItem.infoWindow.visible = !markerItem.infoWindow.visible;
+  };
+  
+  const setDefaultLocation = () => {
+    currentLat.value = 37.566826;
+    currentLng.value = 126.9786567;
+    updateMapCenter();
+  };
+  
+  const updateMapCenter = () => {
+    if (map.value) {
+      map.value.setCenter(new kakao.maps.LatLng(currentLat.value, currentLng.value));
+    }
+  };
+  
+  onMounted(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        currentLat.value = position.coords.latitude;
+        currentLng.value = position.coords.longitude;
+        console.log(position);
+        updateMapCenter();
+      }, () => {
+        // 현재 위치를 가져오지 못했을 때 기본 위치 설정 (서울 시청)
+        setDefaultLocation();
+      });
+    } else {
+      // 브라우저가 Geolocation API를 지원하지 않을 때 기본 위치 설정 (서울 시청)
+      setDefaultLocation();
+    }
+  });
+  </script>
+  
+  <style scoped>
+  .mapview-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    background-color: #f0f2f5;
+    min-height: 100vh;
+    font-family: 'NEXON Lv1 Gothic Low OTF';
+    font-weight: bold;
+  }
+  
+  .left-panel {
+    width: 55%;
+    /* Reduce width to allow more space for the right panel */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .right-panel {
+    width: 40%;
+    /* Increase width to occupy the remaining space */
+    display: flex;
+    flex-direction: column;
+    margin-right: 100px;
+  }
+  
+  .page-title {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  .card {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    margin-bottom: 20px;
+    font-family: 'NEXON Lv1 Gothic Low OTF';
+    font-weight: bold;
+  }
+  
+  .form-card {
+    max-width: 500px;
+    /* Limit the width of form cards */
+    width: 100%;
+  }
+  
+  .map {
+    width: 100%;
+    /* Make the map full width */
+    height: 500px;
+    /* Set a fixed height for the map */
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #333;
+  }
+  
+  input,
+  select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+    font-family: 'NEXON Lv1 Gothic Low OTF';
+    font-weight: bold;
+  }
+  
+  input[type="number"] {
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+    appearance: none;
+  }
+  
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  .submit-button,
+  .search-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #1890ff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: 'NEXON Lv1 Gothic Low OTF';
     font-weight: bold;
   }
   

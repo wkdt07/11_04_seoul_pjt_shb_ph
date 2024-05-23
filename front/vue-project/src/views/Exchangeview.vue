@@ -198,7 +198,7 @@ input[type="number"]::-webkit-inner-spin-button {
   margin: 0;
 }
 </style> -->
-<template>
+<!-- <template>
   <div class="exchange-container">
     <h1 class="page-title">환율 계산기</h1>
     <div class="card">
@@ -395,5 +395,219 @@ input[type="number"]::-webkit-inner-spin-button {
 .submit-button:hover {
   background-color: #40a9ff;
 }
-</style>
+</style> -->
 
+<template>
+  <div class="exchange-container">
+    <h1 class="page-title">환율 계산기</h1>
+    <div class="card">
+      <form @submit.prevent="submitForm">
+        <div class="form-group">
+          <label for="state-select">기준</label>
+          <select id="state-select" v-model="getorgive">
+            <option v-for="state in selections" :key="state" :value="state">{{ state }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="currency-select">통화 선택</label>
+          <select id="currency-select" v-model="selectCur">
+            <option v-for="cur in currency" :key="cur" :value="cur">{{ cur }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label :for="selectCurUnit">금액</label>
+          <input type="number" :id="selectCurUnit" v-model="others" @input="inputEventOther" placeholder="금액을 입력하세요" />
+        </div>
+        <div class="form-group">
+          <label for="krw-input">KRW</label>
+          <input type="number" id="krw-input" v-model="inputwon" @input="inputEventKrw" placeholder="KRW를 입력하세요" />
+        </div>
+        <button type="submit" class="submit-button">계산</button>
+      </form>
+    </div>
+    <Map />
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, watch } from 'vue'
+import axios from 'axios'
+import { useCounterStore } from '../stores/counter';
+import Map from '@/components/Map.vue'
+
+const store = useCounterStore()
+
+const currency = ref([])
+const response = ref([])
+const getorgive = ref('송금 받을 때')
+const selectCur = ref('미 달러')
+const selectCurUnit = ref('USD')
+const Ttb = ref(0)
+const Tts = ref(0)
+const Deal = ref(0)
+
+const carculate = ref(0)
+const inputwon = ref(0)
+const others = ref(0)
+
+const selections = ['송금 받을 때', '송금 보낼 때', '매매 기준율']
+
+const emit = defineEmits(['ExCurrency'])
+
+onMounted(async () => {
+  try {
+    const res = await axios.get(`${store.DJANGO_URL}/exchange/get_exchange_data/`)
+    response.value = res.data.filter(data => data['ttb'] !== '0')
+    if (response.value.length > 0) {
+      currency.value = response.value.map(item => item['cur_nm'])
+      const units = response.value.map(item => item['cur_unit'])
+      emit('ExCurrency', currency.value, units)
+
+      const usdInfo = response.value.find(item => item['cur_nm'] === '미국 달러')
+      if (usdInfo) {
+        selectCurUnit.value = usdInfo['cur_unit']
+        Ttb.value = Number(usdInfo['ttb'].replaceAll(',', ''))
+        Tts.value = Number(usdInfo['tts'].replaceAll(',', ''))
+        Deal.value = Number(usdInfo['deal_bas_r'].replaceAll(',', ''))
+        updateCarculate()
+      }
+    }
+  } catch (error) {
+    console.error('환율 데이터를 가져오는 중 오류가 발생했습니다:', error)
+  }
+})
+
+watch([selectCur, getorgive], () => {
+  const selectedData = response.value.find(item => item['cur_nm'] === selectCur.value)
+  if (selectedData) {
+    selectCurUnit.value = selectedData['cur_unit']
+    if (selectCur.value === '일본 옌' || selectCur.value === '인도네시아 루피아') {
+      Ttb.value = Number(selectedData['ttb'].replaceAll(',', '')) / 100
+      Tts.value = Number(selectedData['tts'].replaceAll(',', '')) / 100
+      Deal.value = Number(selectedData['deal_bas_r'].replaceAll(',', '')) / 100
+    } else {
+      Ttb.value = Number(selectedData['ttb'].replaceAll(',', ''))
+      Tts.value = Number(selectedData['tts'].replaceAll(',', ''))
+      Deal.value = Number(selectedData['deal_bas_r'].replaceAll(',', ''))
+    }
+    updateCarculate()
+    inputEventOther()
+  }
+})
+
+const updateCarculate = () => {
+  if (getorgive.value === '송금 받을 때') {
+    carculate.value = Ttb.value
+  } else if (getorgive.value === '송금 보낼 때') {
+    carculate.value = Tts.value
+  } else {
+    carculate.value = Deal.value
+  }
+}
+
+const inputEventOther = () => {
+  inputwon.value = others.value * carculate.value
+}
+
+const inputEventKrw = () => {
+  others.value = inputwon.value / carculate.value
+}
+</script>
+
+<style scoped>
+@font-face {
+  font-family: 'NEXON Lv1 Gothic Low OTF';
+  src: url('@/assets/NEXON_Lv1_Gothic_Low.otf') format('opentype');
+}
+
+.exchange-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #f0f2f5;
+  min-height: 100vh;
+  font-family: 'NEXON Lv1 Gothic Low OTF';
+  font-weight: bold;
+}
+
+.page-title {
+  font-size: 2em;
+  color: #333;
+  margin-bottom: 20px;
+  font-family: 'NEXON Lv1 Gothic Low OTF';
+  font-weight: bold;
+
+}
+
+.card {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 20px;
+  font-family: 'NEXON Lv1 Gothic Low OTF';
+  font-weight: bold;
+
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #333;
+  font-family: 'NEXON Lv1 Gothic Low OTF';
+  font-weight: light;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 14px;
+  font-family: 'NEXON Lv1 Gothic Low OTF';
+  font-weight: bold;
+}
+
+input[type="number"] {
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: none;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: 'NEXON Lv1 Gothic Low OTF';
+
+  font-weight: bold;
+
+}
+
+.submit-button:hover {
+  font-family: 'NEXON Lv1 Gothic Low OTF';
+
+  background-color: #40a9ff;
+}
+</style>

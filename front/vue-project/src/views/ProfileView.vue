@@ -1283,7 +1283,7 @@ watchEffect(() => {
 </style> -->
 
 
-<template>
+<!-- <template>
   <div>
     <h1 v-if="user">{{ user.username }} 프로필 페이지</h1>
     <img :src="getProfileImgUrl(user.profile_img)" alt="Profile Image" v-if="user && user.profile_img">
@@ -1431,6 +1431,229 @@ watchEffect(() => {
   100% {
     transform: rotate(360deg);
   }
+}
+</style> -->
+
+
+<template>
+  <div class="profile-page">
+    <div class="profile-header">
+      <img :src="getProfileImgUrl(user.profile_img)" alt="Profile Image" class="profile-img" v-if="user && user.profile_img">
+      <div class="profile-info">
+        <h1 v-if="user">{{ user.username }}의 프로필 페이지</h1>
+        <p v-if="user">이름: {{ user.name }}</p>
+        <p v-if="user">이메일: {{ user.email }}</p>
+        <p v-if="user">닉네임: {{ user.nickname }}</p>
+        <p v-if="user">나이: {{ user.age }}</p>
+        <p v-if="user">현재 자산: {{ user.now_money }}</p>
+        <p v-if="user">연봉: {{ user.money_per_year }}</p>
+        <p v-if="user">선호 장소: {{ user.fav_place }}</p>
+        <button v-if="isCurrentUser" @click="editProfile" class="edit-profile-button">프로필 수정</button>
+      </div>
+    </div>
+
+    <div class="contracted-products">
+      <ContractedProductView v-if="user" :products="user.deposits" title="계약된 예금" type="deposit" />
+      <ContractedProductView v-if="user" :products="user.savings" title="계약된 적금" type="saving" />
+    </div>
+
+    <div class="user-articles-comments">
+      <div class="user-articles">
+        <h2 v-if="userArticles.length">작성한 글</h2>
+        <ul v-if="userArticles.length">
+          <li v-for="article in userArticles" :key="article.id">
+            <h3>{{ article.title }}</h3>
+            <p>{{ article.content }}</p>
+          </li>
+        </ul>
+      </div>
+
+      <div class="user-comments">
+        <h2 v-if="userComments.length">작성한 댓글</h2>
+        <ul v-if="userComments.length">
+          <li v-for="comment in userComments" :key="comment.id">
+            <h3>
+              <RouterLink :to="{ name: 'DetailView', params: { id: comment.article } }">
+                {{ getArticleTitle(comment.article) }}
+              </RouterLink>에 달린 댓글
+            </h3>
+            <p>{{ comment.content }}</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <p v-if="error">{{ error }}</p>
+    <p v-if="loading">로딩 중...</p>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, computed, watch, watchEffect } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useCounterStore } from '@/stores/counter';
+import { RouterLink } from 'vue-router';
+import ContractedProductView from '@/views/ContractedProductView.vue';
+
+const router = useRouter();
+const route = useRoute();
+const store = useCounterStore();
+const user = ref(null);
+const userArticles = ref([]);
+const userComments = ref([]);
+const articleTitles = ref({});
+const error = ref(null);
+const loading = ref(false);
+
+const getProfileImgUrl = (imgPath) => {
+  return `${store.DJANGO_URL}${imgPath}`;
+};
+
+const fetchUserInfo = async () => {
+  loading.value = true;
+  error.value = null;
+  try {
+    const username = route.params.username;
+    await store.getUserInfo(username);
+    user.value = store.userInfo;
+    if (user.value) {
+      await store.getUserArticles(user.value.id);
+      userArticles.value = store.userArticles || [];
+
+      await store.getUserComments(user.value.id);
+      userComments.value = store.userComments || [];
+    }
+  } catch (err) {
+    error.value = '사용자 정보를 가져오지 못했습니다.';
+  } finally {
+    loading.value = false;
+  }
+};
+
+const getArticleTitle = (articlePk) => {
+  return articleTitles.value[articlePk] || '알 수 없는 글';
+};
+
+const fetchArticleTitles = async () => {
+  for (const comment of userComments.value) {
+    if (!articleTitles.value[comment.article]) {
+      const article = await store.getArticle(comment.article);
+      articleTitles.value[comment.article] = article.title || '알 수 없는 글';
+    }
+  }
+};
+
+const isCurrentUser = computed(() => {
+  return store.userInfo && store.userInfo.username === route.params.username;
+});
+
+const editProfile = () => {
+  router.push({ name: 'ProfileEditView', params: { username: route.params.username } });
+};
+
+onMounted(fetchUserInfo);
+
+watch(() => route.params.username, fetchUserInfo);
+
+watchEffect(() => {
+  if (userComments.value.length) {
+    fetchArticleTitles();
+  }
+});
+</script>
+
+<style scoped>
+@font-face {
+  font-family: 'NEXON Lv1 Gothic Low OTF';
+  src: url('@/assets/fonts/NEXON_Lv1_Gothic_Low.otf') format('opentype');
+}
+
+.profile-page {
+  font-family: 'NEXON Lv1 Gothic Low OTF', sans-serif;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.profile-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin-right: 20px;
+}
+
+.profile-info {
+  max-width: 600px;
+}
+
+.profile-info h1 {
+  margin: 0 0 10px;
+  font-size: 32px;
+}
+
+.profile-info p {
+  margin: 8px 0;
+  font-size: 18px;
+}
+
+.edit-profile-button {
+  background-color: #2db2ff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.edit-profile-button:hover {
+  background-color: #0a73d9;
+}
+
+.contracted-products {
+  margin-top: 20px;
+  width: 100%;
+}
+
+.user-articles-comments {
+  margin-top: 40px;
+  width: 100%;
+}
+
+.user-articles,
+.user-comments {
+  margin-bottom: 20px;
+}
+
+.user-articles h2,
+.user-comments h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.user-articles ul,
+.user-comments ul {
+  list-style: none;
+  padding: 0;
+}
+
+.user-articles li,
+.user-comments li {
+  margin-bottom: 15px;
+}
+
+.user-articles h3,
+.user-comments h3 {
+  font-size: 20px;
+  margin: 0 0 5px;
 }
 </style>
 

@@ -509,7 +509,7 @@ def make_financial_data(request):
 
         save_product = {
             'fin_prdt_cd': base.get('fin_prdt_cd', '-1'),
-            'fin_co_no': base.get('fin_co_no', '-1'),
+            'fin_co_no': base.get('fin_co_no', '-1'),   
             'kor_co_nm': base.get('kor_co_nm', '-1'),
             'fin_prdt_nm': base.get('fin_prdt_nm', '-1'),
             'dcls_month': dcls_month,

@@ -760,26 +760,10 @@ const signUp = async () => {
 
   try {
     await store.signUp(formData);
-
-    if (fav_place.value) {
-      const response = await axios.get(`${DJANGO_URL}/real_estate/get_recent_real_estate/${fav_place.value}/`);
-      const recentRealEstate = response.data;
-      if (recentRealEstate && recentRealEstate.id) {
-        await axios.post(`${DJANGO_URL}/real_estate/link_real_estate_to_user/`, 
-          { real_estate_id: recentRealEstate.id }, 
-          { headers: { Authorization: `Token ${store.token}` } }
-        );
-      }
-    }
-
-    alert(`${formData.get('username')}님, 성공적으로 회원가입이 완료되었습니다!`);
-    await store.login({ username: formData.get('username'), password: formData.get('password1') });
   } catch (err) {
     if (err.response && err.response.data) {
       alert(`회원가입 실패: ${JSON.stringify(err.response.data)}`);
-    } else {
-      alert('회원가입 요청에 실패했습니다. 다시 시도해 주세요.');
-    }
+    } 
   }
 };
 

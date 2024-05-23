@@ -517,11 +517,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-@font-face {
-  font-family: 'NEXON Lv1 Gothic Low OTF';
-  src: url('@/assets/NEXON_Lv1_Gothic_Low.otf') format('opentype');
-}
-
 .mx-auto {
   margin: auto;
 }

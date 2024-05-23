@@ -70,7 +70,7 @@ const router = createRouter({
     }
     ,
     {
-      path:'/compairView',
+      path:'/compareView',
       name:'CompareView',
       component:CompareView
     }

@@ -1551,7 +1551,7 @@ const editProfile = () => {
   router.push({ name: 'ProfileEditView', params: { username: route.params.username } });
 };
 
-onMounted(fetchUserInfo);
+onMounted(fetchUserInfo,console.log(store.token));
 
 watch(() => route.params.username, fetchUserInfo);
 
@@ -1560,6 +1560,8 @@ watchEffect(() => {
     fetchArticleTitles();
   }
 });
+
+
 </script>
 
 <style scoped>

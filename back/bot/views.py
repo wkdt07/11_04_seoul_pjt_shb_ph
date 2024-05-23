@@ -110,5 +110,96 @@
 
 
 
+import openai
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.conf import settings
+from .models import Answer
+from compare.models import Deposit, Saving
+from compare.serializer import SavingSerializer, DepositSerializer
+from accounts.models import User  # User 모델 임포트
+import requests
+import openai
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.conf import settings
+from django.db import models
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+
+def get_fav_place_products(region_id):
+    # 해당 지역 ID를 가진 사용자들 가져오기
+    users_in_place = User.objects.filter(fav_place=region_id)
+    
+    # 해당 사용자들이 가입한 금융 상품들 가져오기
+    user_deposits = Deposit.objects.filter(user__in=users_in_place)
+    user_savings = Saving.objects.filter(user__in=users_in_place)
+    
+    # 가장 많이 가입된 상위 5개 상품 가져오기
+    top_deposits = list(user_deposits.values('name').annotate(count=Count('name')).order_by('-count')[:5])
+    top_savings = list(user_savings.values('name').annotate(count=Count('name')).order_by('-count')[:5])
+    
+    # 추천 항목이 5개가 안 되는 경우 처리
+    while len(top_deposits) < 5:
+        top_deposits.append({'name': 'No more deposits available', 'count': 0})
+        
+    while len(top_savings) < 5:
+        top_savings.append({'name': 'No more savings available', 'count': 0})
+
+    return top_deposits, top_savings
+
+
+def get_real_estate_id(region):
+    url = f"{settings.BASE_URL}/real_estate/recent/{region}/"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        return data.get('id')
+    return None
+
+
+# 이거 지워야 한다. 
+@csrf_exempt
+@login_required
 def chat(request):
-    pass
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': '사용자가 인증되지 않았습니다.'}, status=403)
+
+    if request.method == "POST":
+        user_message = request.POST.get('message')
+        if not user_message:
+            return JsonResponse({'error': '메시지가 제공되지 않았습니다.'}, status=400)
+        
+        openai.api_key = 'API_KEY'
+        messages = [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": user_message}
+        ]
+
+        fav_place = getattr(request.user, 'fav_place', None)
+        
+        if fav_place:
+            region_id = get_real_estate_id(fav_place)
+            if region_id:
+                top_deposits, top_savings = get_fav_place_products(region_id)
+                messages.append({"role": "assistant", "content": "Here are some financial product recommendations based on your fav_place:"})
+                messages.append({"role": "assistant", "content": f"Top Deposits: {top_deposits}"})
+                messages.append({"role": "assistant", "content": f"Top Savings: {top_savings}"})
+            else:
+                messages.append({"role": "assistant", "content": "Could not find recent real estate information for your fav_place."})
+        else:
+            messages.append({"role": "assistant", "content": "I will explain economic concepts."})
+
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages
+        )
+        
+        ai_message = response.choices[0].message['content']
+        
+        new_answer = Answer(answer=ai_message)
+        new_answer.save()
+        
+        return JsonResponse({'message': ai_message})
+
+    return render(request, 'chat.html')

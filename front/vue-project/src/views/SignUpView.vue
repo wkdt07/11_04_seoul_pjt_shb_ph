@@ -827,6 +827,7 @@ onMounted(() => {
   gap: 15px;
   width: 100%;
   max-width: 500px;
+  margin-top: 40px;
 }
 
 .form-group {
